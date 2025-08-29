@@ -11,34 +11,21 @@ export interface Regret {
   age_when_happened?: number;
   years_ago?: number;
   anonymous_id: string;
-  reactions: {
-    me_too: number;
-    hugs: number;
-    wisdom: number;
-  };
+  reactions: string; // JSON stringified object
   comment_count: number;
-  sliding_doors?: {
-    alternate_path: string;
-    votes_better: number;
-    votes_worse: number;
-    votes_same: number;
-  };
-  created_at: string;
-  updated_at: string;
+  sliding_doors?: string; // JSON stringified object
   is_featured: boolean;
 }
 
 export interface Comment {
   $id: string;
+  $createdAt: string;
+  $updatedAt: string;
   regret_id: string;
   content: string;
   anonymous_id: string;
   comment_type: 'support' | 'similar_experience' | 'advice';
-  reactions: {
-    helpful: number;
-    heart: number;
-  };
-  created_at: string;
+  reactions: string; // JSON stringified object
 }
 
 export interface Reaction {

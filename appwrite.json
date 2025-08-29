@@ -16,7 +16,7 @@
           "key": "story",
           "type": "string",
           "required": true,
-          "size": 10000
+          "size": 2000
         },
         {
           "key": "lesson",
@@ -55,7 +55,7 @@
         {
           "key": "comment_count",
           "type": "integer",
-          "required": true,
+          "required": false,
           "default": 0
         },
         {
@@ -66,7 +66,7 @@
         {
           "key": "is_featured",
           "type": "boolean",
-          "required": true,
+          "required": false,
           "default": false
         }
       ],

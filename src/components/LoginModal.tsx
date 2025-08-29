@@ -75,9 +75,15 @@ export function LoginModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <User className="h-4 w-4 mr-2" />
-          Login
+        <Button 
+          size="lg" 
+          className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-primary/20"
+        >
+          <span className="relative z-10 flex items-center">
+            <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+            Get Started
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10 backdrop-blur-md">
@@ -92,25 +98,25 @@ export function LoginModal() {
           <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg border border-border/50">
             <TabsTrigger 
               value="login" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
             >
               Login
             </TabsTrigger>
             <TabsTrigger 
               value="signup" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
             >
               Sign Up
             </TabsTrigger>
             <TabsTrigger 
               value="anonymous" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
             >
               Anonymous
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="login" className="space-y-6">
+          <TabsContent value="login" className="space-y-6 mt-5">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</Label>
@@ -154,7 +160,7 @@ export function LoginModal() {
             </form>
           </TabsContent>
 
-          <TabsContent value="signup" className="space-y-6">
+          <TabsContent value="signup" className="space-y-6 mt-5">
             <form onSubmit={handleSignup} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="signup-name" className="text-sm font-medium text-foreground">Name</Label>
@@ -214,7 +220,7 @@ export function LoginModal() {
             </form>
           </TabsContent>
 
-          <TabsContent value="anonymous" className="space-y-6">
+          <TabsContent value="anonymous" className="space-y-6 mt-5">
             <div className="text-center space-y-6">
               <div className="space-y-3">
                 <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">

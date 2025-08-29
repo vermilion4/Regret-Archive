@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Clock, Send, ThumbsUp } from 'lucide-react';
 import { Comment } from '@/lib/types';
-import { getAnonymousId, formatTimeAgo } from '@/lib/utils';
+import { getAnonymousId, formatTimeAgo, safeJsonParse } from '@/lib/utils';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
 
@@ -22,12 +22,14 @@ const commentSchema = z.object({
 
 interface CommentSectionProps {
   regretId: string;
+  onCommentAdded?: () => void;
 }
 
-export function CommentSection({ regretId }: CommentSectionProps) {
+export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(commentSchema),
@@ -49,14 +51,43 @@ export function CommentSection({ regretId }: CommentSectionProps) {
         COLLECTIONS.COMMENTS,
         [
           Query.equal('regret_id', regretId),
-          Query.orderDesc('created_at')
+          Query.orderDesc('$createdAt')
         ]
       );
-      setComments(response.documents as Comment[]);
+      setComments(response.documents as unknown as Comment[]);
     } catch (error) {
       console.error('Error fetching comments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateRegretCommentCount = async () => {
+    try {
+      // Get current regret to get the current comment count
+      const currentRegret = await databases.getDocument(
+        DATABASE_ID,
+        COLLECTIONS.REGRETS,
+        regretId
+      );
+      
+      const currentCount = currentRegret.comment_count || 0;
+      
+      // Update the regret with incremented comment count
+      await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTIONS.REGRETS,
+        regretId,
+        {
+          comment_count: currentCount + 1
+        }
+      );
+      
+      console.log('Successfully updated comment count for regret:', regretId);
+    } catch (error) {
+      console.error('Error updating regret comment count:', error);
+      // Don't throw error here as the comment was already created successfully
+      // The comment count will be updated when the parent component refreshes
     }
   };
 
@@ -69,13 +100,13 @@ export function CommentSection({ regretId }: CommentSectionProps) {
         content: data.content,
         anonymous_id: getAnonymousId(),
         comment_type: data.comment_type,
-        reactions: {
+        reactions: JSON.stringify({
           helpful: 0,
           heart: 0
-        },
-        created_at: new Date().toISOString()
+        })
       };
 
+      // Create the comment
       await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.COMMENTS,
@@ -83,8 +114,20 @@ export function CommentSection({ regretId }: CommentSectionProps) {
         commentData
       );
 
+      // Update the regret's comment count
+      await updateRegretCommentCount();
+
       form.reset();
       fetchComments();
+      
+      // Show success message
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      
+      // Notify parent component that a comment was added
+      if (onCommentAdded) {
+        onCommentAdded();
+      }
     } catch (error) {
       console.error('Error submitting comment:', error);
       alert('There was an error submitting your comment. Please try again.');
@@ -103,12 +146,30 @@ export function CommentSection({ regretId }: CommentSectionProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div id="comments" className="space-y-6">
       <div className="flex items-center space-x-2">
         <MessageCircle className="h-5 w-5" />
         <h2 className="text-xl font-semibold">Comments</h2>
         <Badge variant="secondary">{comments.length}</Badge>
       </div>
+
+      {/* Success Message */}
+      {showSuccess && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-green-800">
+                Comment posted successfully!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Comment Form */}
       <Card>
@@ -188,6 +249,7 @@ export function CommentSection({ regretId }: CommentSectionProps) {
           ) : (
             comments.map((comment) => {
               const typeInfo = getCommentTypeInfo(comment.comment_type);
+              const reactions = safeJsonParse(comment.reactions, { helpful: 0, heart: 0 });
               return (
                 <Card key={comment.$id}>
                   <CardContent className="p-4">
@@ -200,7 +262,7 @@ export function CommentSection({ regretId }: CommentSectionProps) {
                       </div>
                       <div className="flex items-center space-x-1 text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        <span className="text-xs">{formatTimeAgo(comment.created_at)}</span>
+                        <span className="text-xs">{formatTimeAgo(comment.$createdAt)}</span>
                       </div>
                     </div>
                     
@@ -215,7 +277,7 @@ export function CommentSection({ regretId }: CommentSectionProps) {
                         className="flex items-center space-x-1"
                       >
                         <ThumbsUp className="h-4 w-4" />
-                        <span className="text-sm">{comment.reactions.helpful}</span>
+                        <span className="text-sm">{reactions.helpful}</span>
                       </Button>
                       
                       <Button
@@ -224,7 +286,7 @@ export function CommentSection({ regretId }: CommentSectionProps) {
                         className="flex items-center space-x-1"
                       >
                         <Heart className="h-4 w-4" />
-                        <span className="text-sm">{comment.reactions.heart}</span>
+                        <span className="text-sm">{reactions.heart}</span>
                       </Button>
                     </div>
                   </CardContent>

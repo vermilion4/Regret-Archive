@@ -53,35 +53,43 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
   });
 
   const onSubmit = async (data: RegretFormData) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form validation errors:', form.formState.errors);
+    
     try {
       setIsSubmitting(true);
+      console.log('Setting isSubmitting to true');
       
-      const regretData = {
-        ...data,
-        anonymous_id: getAnonymousId(),
-        reactions: {
-          me_too: 0,
-          hugs: 0,
-          wisdom: 0
-        },
-        comment_count: 0,
-        is_featured: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+             const regretData = {
+         ...data,
+         anonymous_id: getAnonymousId(),
+         reactions: JSON.stringify({
+           me_too: 0,
+           hugs: 0,
+           wisdom: 0
+         }),
+         sliding_doors: data.sliding_doors ? JSON.stringify(data.sliding_doors) : undefined,
+         comment_count: 0,
+         is_featured: false
+       };
 
-      await databases.createDocument(
+      console.log('Prepared regret data:', regretData);
+      console.log('Attempting to create document...');
+
+      const result = await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         ID.unique(),
         regretData
       );
 
+      console.log('Document created successfully:', result);
       onSuccess();
     } catch (error) {
       console.error('Error submitting regret:', error);
-      alert('There was an error submitting your regret. Please try again.');
+      alert(`There was an error submitting your regret: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
@@ -102,15 +110,15 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
             step <= currentStep 
-              ? 'bg-primary text-primary-foreground' 
+              ? 'bg-primary text-primary-foreground shadow-lg' 
               : 'bg-muted text-muted-foreground'
-          }`}>
-            {step < currentStep ? <Check className="h-4 w-4" /> : step}
+          } ${step === currentStep ? 'ring-4 ring-primary/20 scale-110' : ''}`}>
+            {step < currentStep ? <Check className="h-5 w-5" /> : step}
           </div>
           {step < 4 && (
-            <div className={`w-16 h-0.5 mx-2 ${
+            <div className={`w-20 h-1 mx-3 rounded-full transition-all duration-300 ${
               step < currentStep ? 'bg-primary' : 'bg-muted'
             }`} />
           )}
@@ -132,10 +140,10 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
         {CATEGORIES.map((category) => (
           <Card
             key={category.id}
-            className={`cursor-pointer transition-all ${
+            className={`cursor-pointer transition-all duration-300 transform hover:scale-105 ${
               selectedCategory === category.id 
-                ? 'ring-2 ring-primary border-primary' 
-                : 'hover:border-primary/50'
+                ? 'ring-2 ring-primary border-primary shadow-lg bg-primary/5' 
+                : 'hover:border-primary/50 hover:shadow-md'
             }`}
             onClick={() => {
               setSelectedCategory(category.id);
@@ -143,11 +151,15 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
             }}
           >
             <CardContent className="p-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">{category.icon}</span>
+              <div className="flex items-center space-x-4">
+                <span className={`text-3xl transition-all duration-300 ${
+                  selectedCategory === category.id ? 'scale-110' : ''
+                }`}>{category.icon}</span>
                 <div>
-                  <h4 className="font-medium">{category.name}</h4>
-                  <p className="text-sm text-muted-foreground">{category.description}</p>
+                  <h4 className={`font-semibold text-lg transition-colors duration-300 ${
+                    selectedCategory === category.id ? 'text-primary' : ''
+                  }`}>{category.name}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
                 </div>
               </div>
             </CardContent>
@@ -171,11 +183,18 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
           <label className="text-sm font-medium mb-2 block">Title</label>
           <Input
             placeholder="A brief title for your regret..."
+            className={form.formState.errors.title ? 'border-red-500 focus:border-red-500' : ''}
             {...form.register('title')}
           />
           {form.formState.errors.title && (
-            <p className="text-sm text-red-500 mt-1">{form.formState.errors.title.message}</p>
+            <p className="text-sm text-red-500 mt-1 flex items-center">
+              <span className="mr-1">⚠️</span>
+              {form.formState.errors.title.message}
+            </p>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            {form.watch('title')?.length || 0}/100 characters
+          </p>
         </div>
         
         <div>
@@ -183,11 +202,18 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
           <Textarea
             placeholder="Share the details of what happened, how you felt, and what led to this regret..."
             rows={8}
+            className={form.formState.errors.story ? 'border-red-500 focus:border-red-500' : ''}
             {...form.register('story')}
           />
           {form.formState.errors.story && (
-            <p className="text-sm text-red-500 mt-1">{form.formState.errors.story.message}</p>
+            <p className="text-sm text-red-500 mt-1 flex items-center">
+              <span className="mr-1">⚠️</span>
+              {form.formState.errors.story.message}
+            </p>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            {form.watch('story')?.length || 0}/2000 characters (minimum 50)
+          </p>
         </div>
         
         <div>
@@ -195,11 +221,18 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
           <Textarea
             placeholder="What did you learn from this experience? What would you do differently?"
             rows={4}
+            className={form.formState.errors.lesson ? 'border-red-500 focus:border-red-500' : ''}
             {...form.register('lesson')}
           />
           {form.formState.errors.lesson && (
-            <p className="text-sm text-red-500 mt-1">{form.formState.errors.lesson.message}</p>
+            <p className="text-sm text-red-500 mt-1 flex items-center">
+              <span className="mr-1">⚠️</span>
+              {form.formState.errors.lesson.message}
+            </p>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            {form.watch('lesson')?.length || 0}/500 characters (minimum 20)
+          </p>
         </div>
       </div>
     </div>
@@ -272,6 +305,30 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
         <p className="text-muted-foreground mb-6">
           Review your regret before submitting. You can go back to make changes.
         </p>
+        
+        {/* Validation Summary */}
+        {!form.formState.isValid && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h4 className="text-red-800 font-medium mb-2 flex items-center">
+              <span className="mr-2">⚠️</span>
+              Please fix the following issues before submitting:
+            </h4>
+            <ul className="text-red-700 text-sm space-y-1">
+              {form.formState.errors.title && (
+                <li>• Title: {form.formState.errors.title.message}</li>
+              )}
+              {form.formState.errors.story && (
+                <li>• Story: {form.formState.errors.story.message}</li>
+              )}
+              {form.formState.errors.lesson && (
+                <li>• Lesson: {form.formState.errors.lesson.message}</li>
+              )}
+              {form.formState.errors.category && (
+                <li>• Category: {form.formState.errors.category.message}</li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
       
       <Card>
@@ -325,46 +382,72 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <form 
+      onSubmit={(e) => {
+        console.log('Form submit event triggered');
+        form.handleSubmit(onSubmit)(e);
+      }} 
+      className="space-y-6"
+    >
       {renderStepIndicator()}
       
       {renderCurrentStep()}
       
-      <div className="flex items-center justify-between pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          disabled={currentStep === 1}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-        
-        <div className="flex items-center space-x-2">
-          {currentStep < 4 ? (
-            <Button
-              type="button"
-              onClick={nextStep}
-              disabled={
-                (currentStep === 1 && !selectedCategory) ||
-                (currentStep === 2 && (!form.watch('title') || !form.watch('story') || !form.watch('lesson')))
-              }
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {isSubmitting ? 'Submitting...' : 'Share My Regret'}
-            </Button>
-          )}
-        </div>
-      </div>
+             <div className="flex items-center justify-between pt-8 border-t border-border">
+         <Button
+           type="button"
+           variant="outline"
+           size="lg"
+           onClick={prevStep}
+           disabled={currentStep === 1}
+         >
+           <ArrowLeft className="h-5 w-5 mr-2" />
+           Previous
+         </Button>
+         
+         <div className="flex items-center space-x-3">
+           {currentStep < 4 ? (
+             <Button
+               type="button"
+               variant="navigation"
+               size="lg"
+               onClick={nextStep}
+               disabled={
+                 (currentStep === 1 && !selectedCategory) ||
+                 (currentStep === 2 && (!form.watch('title') || !form.watch('story') || !form.watch('lesson')))
+               }
+             >
+               Next
+               <ArrowRight className="h-5 w-5 ml-2" />
+             </Button>
+           ) : (
+             <Button
+               type="submit"
+               variant="submit"
+               size="xl"
+               disabled={isSubmitting || !form.formState.isValid}
+               onClick={() => {
+                 console.log('Submit button clicked');
+                 console.log('Form is valid:', form.formState.isValid);
+                 console.log('Form errors:', form.formState.errors);
+                 console.log('Form values:', form.getValues());
+               }}
+             >
+               {isSubmitting ? (
+                 <div className="flex items-center">
+                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                   Submitting...
+                 </div>
+               ) : (
+                 <div className="flex items-center">
+                   <span>Share My Regret</span>
+                   <span className="ml-2 text-sm opacity-80">→</span>
+                 </div>
+               )}
+             </Button>
+           )}
+         </div>
+       </div>
     </form>
   );
 }

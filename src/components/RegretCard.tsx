@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Lightbulb, Clock } from 'lucide-react';
 import { Regret } from '@/lib/types';
-import { formatTimeAgo, truncateText, getCategoryIcon } from '@/lib/utils';
+import { formatTimeAgo, truncateText, getCategoryIcon, safeJsonParse } from '@/lib/utils';
 
 interface RegretCardProps {
   regret: Regret;
@@ -16,6 +16,9 @@ interface RegretCardProps {
 export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
   const isFeatured = variant === 'featured';
   const isDetailed = variant === 'detailed';
+  
+  // Parse the reactions JSON string safely
+  const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
 
   return (
     <Link href={`/regret/${regret.$id}`}>
@@ -58,15 +61,15 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm">{regret.reactions?.hugs || 0}</span>
+                <span className="text-sm">{Number(reactions.me_too || 0)}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <MessageCircle className="h-4 w-4 text-blue-500" />
-                <span className="text-sm">{regret.comment_count || 0}</span>
+                <span className="text-sm">{Number(regret.comment_count || 0)}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm">{regret.reactions?.wisdom || 0}</span>
+                <span className="text-sm">{Number(reactions.wisdom || 0)}</span>
               </div>
             </div>
 

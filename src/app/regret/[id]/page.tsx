@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Regret } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
-import { formatTimeAgo, getCategoryIcon } from '@/lib/utils';
+import { formatTimeAgo, getCategoryIcon, safeJsonParse } from '@/lib/utils';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ export default function RegretDetailPage() {
         COLLECTIONS.REGRETS,
         regretId
       );
-      setRegret(response as Regret);
+      setRegret(response as unknown as Regret);
     } catch (error) {
       console.error('Error fetching regret:', error);
     } finally {
@@ -78,6 +78,10 @@ export default function RegretDetailPage() {
     );
   }
 
+  // Parse JSON-serialized fields safely
+  const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
+  const slidingDoors = regret.sliding_doors ? safeJsonParse(regret.sliding_doors, null) : null;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -114,7 +118,7 @@ export default function RegretDetailPage() {
               <div className="flex items-center space-x-4 text-meta">
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4" />
-                  <span>{formatTimeAgo(regret.created_at)}</span>
+                  <span>{formatTimeAgo(regret.$createdAt)}</span>
                 </div>
                 {regret.age_when_happened && (
                   <span>Age {regret.age_when_happened}</span>
@@ -148,14 +152,14 @@ export default function RegretDetailPage() {
             </div>
 
             {/* Sliding Doors */}
-            {regret.sliding_doors && (
+            {slidingDoors && (
               <div className="border border-border rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Sliding Doors</h2>
                 <p className="text-story mb-4">
                   <strong>What could have been different:</strong>
                 </p>
                 <p className="text-story mb-6">
-                  {regret.sliding_doors.alternate_path}
+                  {slidingDoors.alternate_path}
                 </p>
                 
                 <div className="space-y-4">
@@ -168,7 +172,7 @@ export default function RegretDetailPage() {
                         className="flex items-center space-x-1"
                       >
                         <ThumbsUp className="h-4 w-4" />
-                        <span>{regret.sliding_doors.votes_better}</span>
+                        <span>{slidingDoors.votes_better}</span>
                       </Button>
                       <Button
                         variant="outline"
@@ -176,7 +180,7 @@ export default function RegretDetailPage() {
                         className="flex items-center space-x-1"
                       >
                         <Minus className="h-4 w-4" />
-                        <span>{regret.sliding_doors.votes_same}</span>
+                        <span>{slidingDoors.votes_same}</span>
                       </Button>
                       <Button
                         variant="outline"
@@ -184,7 +188,7 @@ export default function RegretDetailPage() {
                         className="flex items-center space-x-1"
                       >
                         <ThumbsDown className="h-4 w-4" />
-                        <span>{regret.sliding_doors.votes_worse}</span>
+                        <span>{slidingDoors.votes_worse}</span>
                       </Button>
                     </div>
                   </div>
@@ -200,7 +204,7 @@ export default function RegretDetailPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-1">
                   <Heart className="h-4 w-4 text-red-500" />
-                  <span>{regret.reactions.hugs} hugs</span>
+                  <span>{reactions.hugs} hugs</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <MessageCircle className="h-4 w-4 text-blue-500" />
@@ -208,7 +212,7 @@ export default function RegretDetailPage() {
                 </div>
                 <div className="flex items-center space-x-1">
                   <Lightbulb className="h-4 w-4 text-yellow-500" />
-                  <span>{regret.reactions.wisdom} wisdom</span>
+                  <span>{reactions.wisdom} wisdom</span>
                 </div>
               </div>
             </div>
@@ -216,13 +220,13 @@ export default function RegretDetailPage() {
         </Card>
 
         {/* Comments Section */}
-        <CommentSection regretId={regret.$id} />
+        <CommentSection regretId={regret.$id} onCommentAdded={fetchRegret} />
       </div>
 
       {/* Sliding Doors Modal */}
-      {showSlidingDoors && regret.sliding_doors && (
+      {showSlidingDoors && slidingDoors && (
         <SlidingDoorsModal
-          slidingDoors={regret.sliding_doors}
+          slidingDoors={slidingDoors}
           onClose={() => setShowSlidingDoors(false)}
           onVote={fetchRegret}
         />

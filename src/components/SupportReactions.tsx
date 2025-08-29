@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, Users, Lightbulb } from 'lucide-react';
 import { Regret } from '@/lib/types';
-import { getAnonymousId } from '@/lib/utils';
+import { getAnonymousId, safeJsonParse } from '@/lib/utils';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 
 interface SupportReactionsProps {
@@ -15,12 +15,15 @@ interface SupportReactionsProps {
 export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
   const [reacting, setReacting] = useState<string | null>(null);
 
+  // Parse the reactions JSON string safely
+  const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
+
   const handleReaction = async (reactionType: 'me_too' | 'hugs' | 'wisdom') => {
     try {
       setReacting(reactionType);
       
       const anonymousId = getAnonymousId();
-      const currentReactions = { ...regret.reactions };
+      const currentReactions = { ...reactions };
       currentReactions[reactionType] += 1;
 
       await databases.updateDocument(
@@ -28,7 +31,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
         COLLECTIONS.REGRETS,
         regret.$id,
         {
-          reactions: currentReactions
+          reactions: JSON.stringify(currentReactions)
         }
       );
 
@@ -55,7 +58,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Users className="h-5 w-5 text-blue-500" />
           <span>Me Too</span>
           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
-            {regret.reactions.me_too}
+            {Number(reactions.me_too || 0)}
           </span>
         </Button>
 
@@ -69,7 +72,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Heart className="h-5 w-5 text-red-500" />
           <span>Hugs</span>
           <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium">
-            {regret.reactions.hugs}
+            {Number(reactions.hugs || 0)}
           </span>
         </Button>
 
@@ -83,7 +86,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Lightbulb className="h-5 w-5 text-yellow-500" />
           <span>Wisdom</span>
           <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium">
-            {regret.reactions.wisdom}
+            {Number(reactions.wisdom || 0)}
           </span>
         </Button>
       </div>

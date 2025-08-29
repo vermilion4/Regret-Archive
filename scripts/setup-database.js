@@ -52,6 +52,9 @@ async function setupDatabase() {
       for (const attribute of collection.attributes) {
         try {
           const command = buildAttributeCommand(attribute, config.databaseId, collectionId);
+          if (command === null) {
+            continue; // Skip unsupported attributes
+          }
           execSync(command, { stdio: 'inherit' });
           console.log(`✅ Attribute ${attribute.key} created successfully!`);
         } catch (error) {
@@ -64,7 +67,7 @@ async function setupDatabase() {
       }
       
       // Create indexes (only if collection was just created or indexes don't exist)
-      console.log(` Setting up indexes for ${collection.name}...`);
+      console.log(`🔍 Setting up indexes for ${collection.name}...`);
       for (const index of collection.indexes) {
         try {
           const command = buildIndexCommand(index, config.databaseId, collectionId);
@@ -82,13 +85,19 @@ async function setupDatabase() {
       // Set permissions (always update to ensure correct permissions)
       console.log(`🔐 Setting permissions for ${collection.name}...`);
       try {
-        const permissionsString = collection.permissions.join(' ');
-        execSync(`appwrite databases update-collection --database-id ${config.databaseId} --collection-id ${collectionId} --permissions ${permissionsString}`, { stdio: 'inherit' });
+        // Format permissions correctly for Appwrite CLI with double quotes
+        const permissionsArgs = collection.permissions.map(perm => {
+          // Convert single quotes to double quotes for Appwrite CLI format
+          const formattedPerm = perm.replace(/'/g, '"');
+          return `--permissions="${formattedPerm}"`;
+        }).join(' ');
+        execSync(`appwrite databases update-collection --database-id ${config.databaseId} --collection-id ${collectionId} --name "${collection.name}" ${permissionsArgs}`, { stdio: 'inherit' });
         console.log(`✅ Permissions updated for ${collection.name}!`);
       } catch (error) {
         console.log(`⚠️  Warning: Could not update permissions for ${collection.name}:`, error.message);
       }
     }
+    
     
     console.log('✅ Database setup completed successfully!');
     console.log('🎉 Your Appwrite database is ready to use!');
@@ -99,24 +108,54 @@ async function setupDatabase() {
 }
 
 function buildAttributeCommand(attribute, databaseId, collectionId) {
+  // For enum attributes, use the specific enum command
+  if (attribute.enum) {
+    let command = `appwrite databases create-enum-attribute --database-id ${databaseId} --collection-id ${collectionId} --key ${attribute.key}`;
+    
+    if (attribute.required !== undefined) {
+      command += ` --required ${attribute.required}`;
+    }
+    
+    if (attribute.default !== undefined) {
+      command += ` --xdefault ${attribute.default}`;
+    }
+    
+    // Add enum elements
+    command += ` --elements ${attribute.enum.join(' ')}`;
+    
+    return command;
+  }
+  
+  // Handle object attributes as string attributes (JSON serialized)
+  if (attribute.type === 'object') {
+    console.log(`📝 Creating object attribute ${attribute.key} as string (JSON serialized)`);
+    let command = `appwrite databases create-string-attribute --database-id ${databaseId} --collection-id ${collectionId} --key ${attribute.key}`;
+    
+    if (attribute.required !== undefined) {
+      command += ` --required ${attribute.required}`;
+    }
+    
+    // Use a smaller size for JSON objects to avoid collection limits
+    command += ` --size 2000`;
+    
+    return command;
+  }
+  
+  // For regular attributes
   let command = `appwrite databases create-${attribute.type}-attribute --database-id ${databaseId} --collection-id ${collectionId} --key ${attribute.key}`;
   
   if (attribute.required !== undefined) {
     command += ` --required ${attribute.required}`;
   }
   
-  // Always include size for string attributes, even for enums
+  // Always include size for string attributes
   if (attribute.type === 'string') {
     command += ` --size ${attribute.size || 255}`;
   }
   
-  if (attribute.default !== undefined) {
-    command += ` --default ${attribute.default}`;
-  }
-  
-  // Handle enum values - Appwrite CLI uses array for enums
-  if (attribute.enum) {
-    command += ` --array true --format ${attribute.enum.join(',')}`;
+  // Only set default value if attribute is not required
+  if (attribute.default !== undefined && !attribute.required) {
+    command += ` --xdefault ${attribute.default}`;
   }
   
   return command;

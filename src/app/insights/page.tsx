@@ -18,6 +18,7 @@ import {
 import { CATEGORIES } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
+import { cn, safeJsonParse } from '@/lib/utils';
 
 interface InsightsData {
   totalRegrets: number;
@@ -68,8 +69,9 @@ export default function InsightsPage() {
       const ageBreakdown: Record<string, number> = {};
       
       regrets.forEach((regret: any) => {
-        // Reactions
-        totalReactions += regret.reactions.me_too + regret.reactions.hugs + regret.reactions.wisdom;
+        // Reactions - Parse the JSON string safely
+        const reactions = safeJsonParse(regret.reactions, { me_too: 0, hugs: 0, wisdom: 0 });
+        totalReactions += (reactions.me_too || 0) + (reactions.hugs || 0) + (reactions.wisdom || 0);
         
         // Categories
         const category = regret.category;

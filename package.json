@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "setup-db": "node scripts/setup-database.js",
+    "fix-json": "node scripts/fix-json-data.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

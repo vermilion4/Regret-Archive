@@ -10,8 +10,18 @@ export function generateAnonymousId(): string {
   return 'anon_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 }
 
-export function formatTimeAgo(date: string): string {
-  return formatDistanceToNow(new Date(date), { addSuffix: true });
+export function formatTimeAgo(date: string | undefined): string {
+  if (!date) return 'Unknown time';
+  
+  try {
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      return 'Unknown time';
+    }
+    return formatDistanceToNow(dateObj, { addSuffix: true });
+  } catch (error) {
+    return 'Unknown time';
+  }
 }
 
 export function truncateText(text: string, maxLength: number): string {

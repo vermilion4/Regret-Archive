@@ -10,8 +10,11 @@ import { Heart, MessageCircle, Lightbulb, TrendingUp, Clock, Users } from 'lucid
 import { Regret, RegretCategory } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
+import { useAuth } from '@/lib/auth';
+import { LoginModal } from '@/components/LoginModal';
 
 export default function HomePage() {
+  const { user, loading: authLoading } = useAuth();
   const [regrets, setRegrets] = useState<Regret[]>([]);
   const [featuredRegret, setFeaturedRegret] = useState<Regret | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<RegretCategory | 'all'>('all');
@@ -19,8 +22,10 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
 
   useEffect(() => {
-    fetchRegrets();
-  }, [selectedCategory, sortBy]);
+    if (!authLoading && user) {
+      fetchRegrets();
+    }
+  }, [selectedCategory, sortBy, user, authLoading]);
 
   const fetchRegrets = async () => {
     try {
@@ -34,7 +39,7 @@ export default function HomePage() {
       }
       
       if (sortBy === 'recent') {
-        queries.push(Query.orderDesc('created_at'));
+        queries.push(Query.orderDesc('$createdAt')); // Fixed: use $createdAt instead of created_at
       } else {
         queries.push(Query.orderDesc('comment_count'));
       }
@@ -48,12 +53,24 @@ export default function HomePage() {
         queries
       );
 
-      const regretsData = response.documents as Regret[];
-      setRegrets(regretsData);
+      const regretsData = response.documents as unknown as Regret[];
+      
+      // Ensure reactions object is properly initialized for each regret
+      const processedRegrets = regretsData.map(regret => ({
+        ...regret,
+        reactions: regret.reactions || {
+          hugs: 0,
+          me_too: 0,
+          wisdom: 0
+        },
+        comment_count: regret.comment_count || 0
+      }));
+      
+      setRegrets(processedRegrets);
 
       // Set featured regret (first one for now)
-      if (regretsData.length > 0) {
-        setFeaturedRegret(regretsData[0]);
+      if (processedRegrets.length > 0) {
+        setFeaturedRegret(processedRegrets[0]);
       }
     } catch (error) {
       console.error('Error fetching regrets:', error);
@@ -65,6 +82,37 @@ export default function HomePage() {
   const filteredRegrets = selectedCategory === 'all' 
     ? regrets 
     : regrets.filter(regret => regret.category === selectedCategory);
+
+  // Show loading state while auth is loading
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Regret Archive
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            A safe, anonymous space to share regrets and life lessons. 
+            Connect with others who understand your experiences.
+          </p>
+          <div className="flex justify-center">
+            <LoginModal />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -82,14 +130,14 @@ export default function HomePage() {
 
         {/* Featured Regret */}
         {featuredRegret && (
-          <Card className="mb-8 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+          <Card className="mb-8 bg-linear-to-r from-primary/10 to-secondary/10 border-primary/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <Badge variant="secondary" className="bg-primary/20 text-primary">
                   Regret of the Day
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {featuredRegret.reactions.hugs + featuredRegret.reactions.me_too + featuredRegret.reactions.wisdom} reactions
+                  {((featuredRegret.reactions?.hugs || 0) + (featuredRegret.reactions?.me_too || 0) + (featuredRegret.reactions?.wisdom || 0))} reactions
                 </span>
               </div>
             </CardHeader>

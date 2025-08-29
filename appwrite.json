@@ -1,0 +1,204 @@
+{
+  "projectId": "hackathon-project-appwrite",
+  "endpoint": "https://nyc.cloud.appwrite.io/v1",
+  "databaseId": "regret-archive",
+  "collections": {
+    "regrets": {
+      "name": "Regrets",
+      "attributes": [
+        {
+          "key": "title",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "story",
+          "type": "string",
+          "required": true,
+          "size": 10000
+        },
+        {
+          "key": "lesson",
+          "type": "string",
+          "required": true,
+          "size": 1000
+        },
+        {
+          "key": "category",
+          "type": "string",
+          "required": true,
+          "size": 255,
+          "enum": ["career", "relationships", "money", "education", "health", "family", "other"]
+        },
+        {
+          "key": "age_when_happened",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "years_ago",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "anonymous_id",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "reactions",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "comment_count",
+          "type": "integer",
+          "required": true,
+          "default": 0
+        },
+        {
+          "key": "sliding_doors",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "is_featured",
+          "type": "boolean",
+          "required": true,
+          "default": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "category",
+          "type": "key",
+          "attributes": ["category"]
+        },
+        {
+          "key": "created_at",
+          "type": "key",
+          "attributes": ["$createdAt"]
+        },
+        {
+          "key": "is_featured",
+          "type": "key",
+          "attributes": ["is_featured"]
+        }
+      ],
+      "permissions": [
+        "read('any')",
+        "create('any')",
+        "update('any')",
+        "delete('any')"
+      ]
+    },
+    "comments": {
+      "name": "Comments",
+      "attributes": [
+        {
+          "key": "regret_id",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "content",
+          "type": "string",
+          "required": true,
+          "size": 2000
+        },
+        {
+          "key": "anonymous_id",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "comment_type",
+          "type": "string",
+          "required": true,
+          "size": 255,
+          "enum": ["support", "similar_experience", "advice"]
+        },
+        {
+          "key": "reactions",
+          "type": "object",
+          "required": true
+        }
+      ],
+      "indexes": [
+        {
+          "key": "regret_id",
+          "type": "key",
+          "attributes": ["regret_id"]
+        },
+        {
+          "key": "created_at",
+          "type": "key",
+          "attributes": ["$createdAt"]
+        }
+      ],
+      "permissions": [
+        "read('any')",
+        "create('any')",
+        "update('any')",
+        "delete('any')"
+      ]
+    },
+    "reactions": {
+      "name": "Reactions",
+      "attributes": [
+        {
+          "key": "target_id",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "target_type",
+          "type": "string",
+          "required": true,
+          "size": 255,
+          "enum": ["regret", "comment"]
+        },
+        {
+          "key": "reaction_type",
+          "type": "string",
+          "required": true,
+          "size": 255
+        },
+        {
+          "key": "anonymous_id",
+          "type": "string",
+          "required": true,
+          "size": 255
+        }
+      ],
+      "indexes": [
+        {
+          "key": "target_id",
+          "type": "key",
+          "attributes": ["target_id"]
+        },
+        {
+          "key": "target_type",
+          "type": "key",
+          "attributes": ["target_type"]
+        },
+        {
+          "key": "anonymous_id",
+          "type": "key",
+          "attributes": ["anonymous_id"]
+        }
+      ],
+      "permissions": [
+        "read('any')",
+        "create('any')",
+        "update('any')",
+        "delete('any')"
+      ]
+    }
+  }
+}

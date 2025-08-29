@@ -1,4 +1,4 @@
-import { Client, Account, Databases } from "appwrite";
+import { Client, Account, Databases, ID } from "appwrite";
 
 const client = new Client()
   .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
@@ -15,4 +15,4 @@ export const COLLECTIONS = {
   REACTIONS: 'reactions'
 } as const;
 
-export { client, account, databases };
+export { client, account, databases, ID };

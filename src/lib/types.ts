@@ -2,6 +2,8 @@ export type RegretCategory = 'career' | 'relationships' | 'money' | 'education' 
 
 export interface Regret {
   $id: string;
+  $createdAt: string;
+  $updatedAt: string;
   title: string;
   story: string;
   lesson: string;

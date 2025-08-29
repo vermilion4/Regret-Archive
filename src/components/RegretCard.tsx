@@ -30,7 +30,7 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
             </div>
             <div className="flex items-center space-x-1 text-muted-foreground">
               <Clock className="h-3 w-3" />
-              <span className="text-xs">{formatTimeAgo(regret.created_at)}</span>
+              <span className="text-xs">{formatTimeAgo(regret.$createdAt)}</span>
             </div>
           </div>
           
@@ -58,15 +58,15 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm">{regret.reactions.hugs}</span>
+                <span className="text-sm">{regret.reactions?.hugs || 0}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <MessageCircle className="h-4 w-4 text-blue-500" />
-                <span className="text-sm">{regret.comment_count}</span>
+                <span className="text-sm">{regret.comment_count || 0}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm">{regret.reactions.wisdom}</span>
+                <span className="text-sm">{regret.reactions?.wisdom || 0}</span>
               </div>
             </div>
 

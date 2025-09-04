@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,39 +38,56 @@ const formSchema = z.object({
     "family",
     "other",
   ]),
-  age_when_happened: z.number().min(1).max(120).optional(),
-  years_ago: z.number().min(0).max(100).optional(),
-  sliding_doors: z
-    .object({
-      alternate_path: z
-        .string()
-        .min(20, "Alternate path must be at least 20 characters")
-        .max(500, "Alternate path must be less than 500 characters"),
-    })
-    .optional(),
+  age_when_happened: z.number().min(1).max(120).optional().or(z.undefined()),
+  years_ago: z.number().min(0).max(100).optional().or(z.undefined()),
+  sliding_doors: z.object({
+    alternate_path: z
+      .string()
+      .min(20, "Alternate path must be at least 20 characters")
+      .max(500, "Alternate path must be less than 500 characters"),
+  }).optional().or(z.undefined()),
+}).refine((data) => {
+  // Custom validation: if sliding doors is enabled, alternate_path is required
+  // This will be handled by our custom validation logic instead
+  return true;
 });
 
 interface RegretFormProps {
   onSuccess: () => void;
   isSubmitting: boolean;
   setIsSubmitting: (submitting: boolean) => void;
+  formRef: React.RefObject<HTMLDivElement>;
 }
 
 export function RegretForm({
   onSuccess,
   isSubmitting,
   setIsSubmitting,
+  formRef,
 }: RegretFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategory, setSelectedCategory] =
     useState<RegretCategory | null>(null);
   const [includeSlidingDoors, setIncludeSlidingDoors] = useState(false);
+  const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
 
   const handleSlidingDoorsToggle = (include: boolean) => {
     setIncludeSlidingDoors(include);
     if (!include) {
       // Clear the sliding_doors field when toggling off
       form.setValue("sliding_doors", undefined);
+      // Clear any validation errors for sliding doors
+      form.clearErrors("sliding_doors.alternate_path");
+    } else {
+      // When enabling sliding doors, check if field is empty and show error
+      const currentValue = form.getValues("sliding_doors.alternate_path");
+      if (!currentValue || currentValue.length < 20) {
+        setHasAttemptedValidation(true);
+        form.setError("sliding_doors.alternate_path", {
+          type: "required",
+          message: "Alternate path is required when sliding doors is enabled"
+        });
+      }
     }
   };
 
@@ -96,6 +113,50 @@ export function RegretForm({
     return Object.keys(errors).length === 0;
   };
 
+  const validateCurrentStep = () => {
+    const values = form.getValues();
+    const errors = form.formState.errors;
+
+    switch (currentStep) {
+      case 1:
+        // Step 1: Category selection
+        return selectedCategory !== null;
+      
+      case 2:
+        // Step 2: Title, Story, and Lesson
+        const step2Errors = [];
+        if (!values.title || values.title.length < 10) {
+          step2Errors.push("title");
+        }
+        if (!values.story || values.story.length < 50) {
+          step2Errors.push("story");
+        }
+        if (!values.lesson || values.lesson.length < 20) {
+          step2Errors.push("lesson");
+        }
+        return step2Errors.length === 0;
+      
+      case 3:
+        // Step 3: Optional fields, but sliding doors is required if enabled
+        if (includeSlidingDoors) {
+          return values.sliding_doors?.alternate_path && 
+                 values.sliding_doors.alternate_path.length >= 20;
+        }
+        return true;
+      
+      case 4:
+        // Step 4: Review - check if sliding doors is valid if enabled
+        if (includeSlidingDoors) {
+          return values.sliding_doors?.alternate_path && 
+                 values.sliding_doors.alternate_path.length >= 20;
+        }
+        return true;
+      
+      default:
+        return true;
+    }
+  };
+
   const form = useForm<RegretFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -109,11 +170,45 @@ export function RegretForm({
     },
   });
 
+  // Clear validation errors as user fixes them
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (type === 'change' && name) {
+        // Clear the specific field error when user starts typing
+        if (form.formState.errors[name as keyof RegretFormData]) {
+          form.clearErrors(name as keyof RegretFormData);
+        }
+        
+        // Special handling for sliding doors field
+        if (name === "sliding_doors.alternate_path" && includeSlidingDoors) {
+          const fieldValue = value.sliding_doors?.alternate_path;
+          if (fieldValue && fieldValue.length >= 20) {
+            // Clear error if field is now valid
+            form.clearErrors("sliding_doors.alternate_path");
+          } else if (fieldValue && fieldValue.length < 20) {
+            // Set error if field is too short
+            form.setError("sliding_doors.alternate_path", {
+              type: "min",
+              message: "Alternate path must be at least 20 characters"
+            });
+          }
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, includeSlidingDoors]);
+
   const onSubmit = async (data: RegretFormData) => {
     try {
       setIsSubmitting(true);
+      
+      // Filter out undefined values for Appwrite compatibility
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, value]) => value !== undefined && value !== null)
+      );
+      
       const regretData = {
-        ...data,
+        ...cleanData,
         anonymous_id: getAnonymousId(),
         reactions: JSON.stringify({
           me_too: 0,
@@ -122,12 +217,12 @@ export function RegretForm({
         }),
         sliding_doors: data.sliding_doors
           ? JSON.stringify(data.sliding_doors)
-          : undefined,
+          : null,
         comment_count: 0,
         is_featured: false,
       };
 
-      const result = await databases.createDocument(
+      await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         ID.unique(),
@@ -150,13 +245,33 @@ export function RegretForm({
 
   const nextStep = () => {
     if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
+      // Mark that user has attempted validation
+      setHasAttemptedValidation(true);
+      
+      // Always trigger validation to show error messages
+      form.trigger();
+      
+      // Mark form as submitted to show step 1 validation error
+      if (currentStep === 1) {
+        form.handleSubmit(() => {})();
+      }
+      
+      // Only proceed if validation passes
+      if (validateCurrentStep()) {
+        setCurrentStep(currentStep + 1);
+        // Reset validation attempt flag for new step
+        setHasAttemptedValidation(false);
+        // Scroll to top of form when moving to next step
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of form when moving to previous step
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -193,6 +308,12 @@ export function RegretForm({
           Select the category that best fits your regret. This helps others find
           stories they can relate to.
         </p>
+        {!selectedCategory && hasAttemptedValidation && (
+          <p className="mb-4 flex items-center text-sm text-red-500">
+            <span className="mr-1">⚠️</span>
+            Please select a category to continue
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -263,7 +384,7 @@ export function RegretForm({
             }
             {...form.register("title")}
           />
-          {form.formState.errors.title && (
+          {hasAttemptedValidation && form.formState.errors.title && (
             <p className="mt-1 flex items-center text-sm text-red-500">
               <span className="mr-1">⚠️</span>
               {form.formState.errors.title.message}
@@ -286,7 +407,7 @@ export function RegretForm({
             }
             {...form.register("story")}
           />
-          {form.formState.errors.story && (
+          {hasAttemptedValidation && form.formState.errors.story && (
             <p className="mt-1 flex items-center text-sm text-red-500">
               <span className="mr-1">⚠️</span>
               {form.formState.errors.story.message}
@@ -311,7 +432,7 @@ export function RegretForm({
             }
             {...form.register("lesson")}
           />
-          {form.formState.errors.lesson && (
+          {hasAttemptedValidation && form.formState.errors.lesson && (
             <p className="mt-1 flex items-center text-sm text-red-500">
               <span className="mr-1">⚠️</span>
               {form.formState.errors.lesson.message}
@@ -343,7 +464,13 @@ export function RegretForm({
           <Input
             type="number"
             placeholder="e.g., 25"
-            {...form.register("age_when_happened", { valueAsNumber: true })}
+            {...form.register("age_when_happened", { 
+              setValueAs: (value) => {
+                if (value === "" || value === null || value === undefined) return undefined;
+                const num = Number(value);
+                return isNaN(num) ? undefined : num;
+              }
+            })}
           />
         </div>
 
@@ -352,7 +479,13 @@ export function RegretForm({
           <Input
             type="number"
             placeholder="e.g., 5"
-            {...form.register("years_ago", { valueAsNumber: true })}
+            {...form.register("years_ago", { 
+              setValueAs: (value) => {
+                if (value === "" || value === null || value === undefined) return undefined;
+                const num = Number(value);
+                return isNaN(num) ? undefined : num;
+              }
+            })}
           />
         </div>
       </div>
@@ -381,7 +514,7 @@ export function RegretForm({
               rows={4}
               {...form.register("sliding_doors.alternate_path")}
             />
-            {form.formState.errors.sliding_doors?.alternate_path && (
+            {hasAttemptedValidation && form.formState.errors.sliding_doors?.alternate_path && (
               <p className="mt-1 text-sm text-red-500">
                 {form.formState.errors.sliding_doors.alternate_path.message}
               </p>
@@ -401,7 +534,7 @@ export function RegretForm({
         </p>
 
         {/* Validation Summary */}
-        {!form.formState.isValid && !isFormValid() && (
+        {hasAttemptedValidation && !form.formState.isValid && !isFormValid() && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
             <h4 className="mb-2 flex items-center font-medium text-red-800">
               <span className="mr-2">⚠️</span>
@@ -419,6 +552,15 @@ export function RegretForm({
               )}
               {form.formState.errors.category && (
                 <li>• Category: {form.formState.errors.category.message}</li>
+              )}
+              {form.formState.errors.age_when_happened && (
+                <li>• Age when happened: {form.formState.errors.age_when_happened.message}</li>
+              )}
+              {form.formState.errors.years_ago && (
+                <li>• Years ago: {form.formState.errors.years_ago.message}</li>
+              )}
+              {form.formState.errors.sliding_doors?.alternate_path && (
+                <li>• Sliding doors: {form.formState.errors.sliding_doors.alternate_path.message}</li>
               )}
             </ul>
           </div>
@@ -458,21 +600,27 @@ export function RegretForm({
             <p className="text-quote">"{form.watch("lesson")}"</p>
           </div>
 
-          {(form.watch("age_when_happened") || form.watch("years_ago")) && (
-            <div className="text-meta">
-              {form.watch("age_when_happened") && (
-                <span>
-                  Age when happened: {form.watch("age_when_happened")}
-                </span>
-              )}
-              {form.watch("age_when_happened") && form.watch("years_ago") && (
-                <span> • </span>
-              )}
-              {form.watch("years_ago") && (
-                <span>{form.watch("years_ago")} years ago</span>
-              )}
-            </div>
-          )}
+          {(() => {
+            const age = form.watch("age_when_happened");
+            const years = form.watch("years_ago");
+            const hasValidAge = age !== undefined && age !== null && !isNaN(Number(age));
+            const hasValidYears = years !== undefined && years !== null && !isNaN(Number(years));
+            
+            if (hasValidAge || hasValidYears) {
+              return (
+                <div className="text-meta">
+                  {hasValidAge && (
+                    <span>Age when happened: {age}</span>
+                  )}
+                  {hasValidAge && hasValidYears && <span> • </span>}
+                  {hasValidYears && (
+                    <span>{years} years ago</span>
+                  )}
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {includeSlidingDoors &&
             form.watch("sliding_doors.alternate_path") && (
@@ -529,13 +677,6 @@ export function RegretForm({
               variant="navigation"
               size="lg"
               onClick={nextStep}
-              disabled={
-                (currentStep === 1 && !selectedCategory) ||
-                (currentStep === 2 &&
-                  (!form.watch("title") ||
-                    !form.watch("story") ||
-                    !form.watch("lesson")))
-              }
               className="w-full sm:w-auto"
             >
               <span className="text-sm sm:text-base">Next</span>
@@ -548,6 +689,10 @@ export function RegretForm({
               size="xl"
               disabled={isSubmitting || !isFormValid()}
               onClick={() => {
+                // Mark that user has attempted validation
+                setHasAttemptedValidation(true);
+                // Trigger validation to show any errors
+                form.trigger();
                 // Only submit if form is valid
                 if (isFormValid()) {
                   form.handleSubmit(onSubmit)();

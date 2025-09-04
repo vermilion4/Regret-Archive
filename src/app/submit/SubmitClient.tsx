@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RegretForm } from "@/components/RegretForm";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -19,6 +19,7 @@ export default function SubmitClient() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null!);
 
   const handleSubmitSuccess = () => {
     router.push("/");
@@ -118,7 +119,7 @@ export default function SubmitClient() {
         </div> */}
 
         {/* Form */}
-        <Card>
+        <Card ref={formRef}>
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Badge variant="secondary" className="bg-primary/20 text-primary">
@@ -131,6 +132,7 @@ export default function SubmitClient() {
               onSuccess={handleSubmitSuccess}
               isSubmitting={isSubmitting}
               setIsSubmitting={setIsSubmitting}
+              formRef={formRef}
             />
           </CardContent>
         </Card>

@@ -14,6 +14,7 @@ import { Comment } from '@/lib/types';
 import { getAnonymousId, formatTimeAgo, safeJsonParse } from '@/lib/utils';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
+import toast from 'react-hot-toast';
 
 const commentSchema = z.object({
   content: z.string().min(10, 'Comment must be at least 10 characters').max(500, 'Comment must be less than 500 characters'),
@@ -30,6 +31,7 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [reacting, setReacting] = useState<{commentId: string, type: string} | null>(null);
 
   const form = useForm({
     resolver: zodResolver(commentSchema),
@@ -50,7 +52,14 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
           Query.orderDesc('$createdAt')
         ]
       );
-      setComments(response.documents as unknown as Comment[]);
+      
+      // Ensure each comment has default reactions
+      const commentsWithDefaultReactions = response.documents.map(comment => ({
+        ...comment,
+        reactions: comment.reactions || JSON.stringify({ helpful: 0, heart: 0 })
+      }));
+      
+      setComments(commentsWithDefaultReactions as unknown as Comment[]);
     } catch (error) {
       console.error('Error fetching comments:', error);
     } finally {
@@ -88,6 +97,41 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
     }
   };
 
+  const handleReaction = async (commentId: string, reactionType: 'helpful' | 'heart') => {
+    try {
+      setReacting({ commentId, type: reactionType });
+      
+      const comment = comments.find(c => c.$id === commentId);
+      if (!comment) return;
+
+      // Ensure default reaction values
+      const currentReactions = safeJsonParse(comment.reactions, { helpful: 0, heart: 0 });
+      
+      // Increment the specific reaction
+      const updatedReactions = {
+        ...currentReactions,
+        [reactionType]: (currentReactions[reactionType] || 0) + 1
+      };
+
+      await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTIONS.COMMENTS,
+        commentId,
+        {
+          reactions: JSON.stringify(updatedReactions)
+        }
+      );
+
+      await fetchComments();
+      toast.success('Thanks for your reaction!');
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction. Please try again.');
+    } finally {
+      setReacting(null);
+    }
+  };
+
   const onSubmit = async (data: { content: string; comment_type: 'support' | 'similar_experience' | 'advice' }) => {
     try {
       setSubmitting(true);
@@ -120,6 +164,7 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
       // Show success message
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
+      toast.success('Comment posted successfully!');
       
       // Notify parent component that a comment was added
       if (onCommentAdded) {
@@ -127,7 +172,7 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
       }
     } catch (error) {
       console.error('Error submitting comment:', error);
-      alert('There was an error submitting your comment. Please try again.');
+      toast.error('Failed to post comment. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -271,19 +316,23 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 hover:bg-blue-50"
+                        onClick={() => handleReaction(comment.$id, 'helpful')}
+                        disabled={reacting?.commentId === comment.$id}
                       >
-                        <ThumbsUp className="h-4 w-4" />
-                        <span className="text-sm">{reactions.helpful}</span>
+                        <ThumbsUp className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm">{reactions.helpful || 0}</span>
                       </Button>
                       
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 hover:bg-red-50"
+                        onClick={() => handleReaction(comment.$id, 'heart')}
+                        disabled={reacting?.commentId === comment.$id}
                       >
-                        <Heart className="h-4 w-4" />
-                        <span className="text-sm">{reactions.heart}</span>
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <span className="text-sm">{reactions.heart || 0}</span>
                       </Button>
                     </div>
                   </CardContent>

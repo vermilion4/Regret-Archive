@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/lib/auth'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { StructuredData } from '@/components/StructuredData'
+import { ToastProvider } from '@/components/ToastProvider'
 import { bungee } from './fonts'
 
 const fredoka = Fredoka({ 
@@ -153,6 +154,7 @@ export default function RootLayout({
               </main>
               <Footer />
             </div>
+            <ToastProvider />
           </ProtectedRoute>
         </AuthProvider>
       </body>

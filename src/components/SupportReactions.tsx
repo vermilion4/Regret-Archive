@@ -6,6 +6,7 @@ import { Heart, Users, Lightbulb } from 'lucide-react';
 import { Regret } from '@/lib/types';
 import { getAnonymousId, safeJsonParse } from '@/lib/utils';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
+import toast from 'react-hot-toast';
 
 interface SupportReactionsProps {
   regret: Regret;
@@ -36,8 +37,10 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
       );
 
       onUpdate();
+      toast.success('Thanks for showing your support!');
     } catch (error) {
       console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction. Please try again.');
     } finally {
       setReacting(null);
     }
@@ -47,7 +50,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Show Support</h3>
       
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center flex-wrap gap-4">
         <Button
           variant="outline"
           size="lg"

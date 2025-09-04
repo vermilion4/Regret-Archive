@@ -7,6 +7,7 @@ import { CategoryFilter } from '@/components/CategoryFilter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Pagination } from '@/components/ui/pagination';
 import { Heart, MessageCircle, Lightbulb, TrendingUp, Clock, Users, Sparkles, ArrowRight, ArrowUp } from 'lucide-react';
 import { Regret, RegretCategory } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
@@ -42,6 +43,12 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
   const [heroInView, setHeroInView] = useState(true);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const itemsPerPage = 6;
 
   // Handle URL category parameter
   useEffect(() => {
@@ -57,7 +64,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     try {
       setLoading(true);
       
-      // Build queries
+      // Build queries for pagination
       const queries = [];
       
       if (selectedCategory !== 'all') {
@@ -70,15 +77,27 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         queries.push(Query.orderDesc('comment_count'));
       }
       
-      queries.push(Query.limit(20));
+      // Add pagination
+      const offset = (currentPage - 1) * itemsPerPage;
+      queries.push(Query.offset(offset));
+      queries.push(Query.limit(itemsPerPage));
 
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        COLLECTIONS.REGRETS,
-        queries
-      );
+      // First, get total count for pagination
+      const countQueries = [...queries];
+      countQueries.pop(); // Remove limit
+      countQueries.pop(); // Remove offset
+      
+      const [response, countResponse] = await Promise.all([
+        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, queries),
+        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, countQueries)
+      ]);
 
       const regretsData = response.documents as unknown as Regret[];
+      const totalCount = countResponse.total;
+      
+      // Update pagination state
+      setTotalItems(totalCount);
+      setTotalPages(Math.ceil(totalCount / itemsPerPage));
       
       const processedRegrets = regretsData.map(regret => {
         // Ensure reactions is valid JSON
@@ -105,7 +124,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       
       setRegrets(processedRegrets);
 
-      if (processedRegrets.length > 0) {
+      // Set featured regret from first page only
+      if (currentPage === 1 && processedRegrets.length > 0) {
         setFeaturedRegret(processedRegrets[0]);
       }
     } catch (error) {
@@ -113,7 +133,22 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, sortBy, user]);
+  }, [selectedCategory, sortBy, user, currentPage, itemsPerPage]);
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of stories section when changing pages
+    const storiesSection = document.getElementById('stories');
+    if (storiesSection) {
+      storiesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, sortBy]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -133,9 +168,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const filteredRegrets = selectedCategory === 'all' 
-    ? regrets 
-    : regrets.filter(regret => regret.category === selectedCategory);
+  // No need for client-side filtering since we're doing it in the database query
 
   // Show loading state while auth is loading
   if (authLoading) {
@@ -407,7 +440,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
             <div className="grid grid-cols-3 gap-8 max-w-md mx-auto">
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                  {regrets.length}
+                  {totalItems || regrets.length}
                 </div>
                 <div className="text-sm text-muted-foreground">Stories</div>
               </div>
@@ -471,7 +504,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
             </div>
             
             <div className="text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-full">
-              {filteredRegrets.length} stories
+              {totalItems || regrets.length} stories
             </div>
           </div>
         </div>
@@ -492,14 +525,30 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16 items-stretch">
-            {filteredRegrets.map((regret) => (
-              <RegretCard key={regret.$id} regret={regret} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 items-stretch">
+              {regrets.map((regret) => (
+                <RegretCard key={regret.$id} regret={regret} />
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mb-16">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  className="justify-center"
+                />
+              </div>
+            )}
+          </>
         )}
 
-        {!loading && filteredRegrets.length === 0 && (
+        {!loading && regrets.length === 0 && (
           <div className="text-center py-20">
             <div className="text-8xl mb-8 opacity-60">📝</div>
             <h3 className="text-2xl font-semibold mb-4">No stories found</h3>

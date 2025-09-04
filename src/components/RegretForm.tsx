@@ -15,6 +15,7 @@ import { RegretFormData, RegretCategory, CATEGORIES } from '@/lib/types';
 import { getAnonymousId } from '@/lib/utils';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { ID } from 'appwrite';
+import toast from 'react-hot-toast';
 
 const formSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters').max(100, 'Title must be less than 100 characters'),
@@ -101,10 +102,11 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
         regretData
       );
 
+      toast.success('Your regret has been shared successfully! Thank you for your courage.');
       onSuccess();
     } catch (error) {
       console.error('Error submitting regret:', error);
-      alert(`There was an error submitting your regret: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Failed to submit your regret: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }

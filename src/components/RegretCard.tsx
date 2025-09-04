@@ -61,7 +61,7 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm">{Number(reactions.me_too || 0)}</span>
+                <span className="text-sm">{Number(reactions.hugs || 0)}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <MessageCircle className="h-4 w-4 text-blue-500" />

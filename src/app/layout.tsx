@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/lib/auth'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { StructuredData } from '@/components/StructuredData'
 import { bungee } from './fonts'
 
 const fredoka = Fredoka({ 
@@ -14,14 +15,75 @@ const fredoka = Fredoka({
 })
 
 export const metadata: Metadata = {
-  title: 'Regret Archive - Share Your Regrets Anonymously',
-  description: 'A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.',
-  keywords: 'regrets, life lessons, anonymous, community, personal growth',
-  authors: [{ name: 'Regret Archive' }],
+  title: {
+    default: 'Regret Archive - Share Your Regrets Anonymously',
+    template: '%s | Regret Archive'
+  },
+  description: 'A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences. Find support, wisdom, and community in shared stories of growth.',
+  keywords: [
+    'regrets',
+    'life lessons',
+    'anonymous sharing',
+    'community support',
+    'personal growth',
+    'life experiences',
+    'emotional support',
+    'wisdom sharing',
+    'regret stories',
+    'life advice',
+    'anonymous stories',
+    'personal development'
+  ],
+  authors: [{ name: 'Adaeze Ndupu' }],
+  creator: 'Adaeze Ndupu',
+  publisher: 'Adaeze Ndupu',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://regret-archive.appwrite.network'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Regret Archive - Share Your Regrets Anonymously',
-    description: 'A safe, anonymous platform for sharing regrets and life lessons.',
+    description: 'A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.',
+    url: 'https://regret-archive.appwrite.network',
+    siteName: 'Regret Archive',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Regret Archive - Share Your Regrets Anonymously',
+      },
+    ],
+    locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Regret Archive - Share Your Regrets Anonymously',
+    description: 'A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.',
+    images: ['/og-image.png'],
+    creator: '@adaezendupu',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
   },
 }
 
@@ -32,6 +94,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <StructuredData 
+          type="website" 
+          data={{}} 
+        />
+        <StructuredData 
+          type="organization" 
+          data={{}} 
+        />
+      </head>
       <body className={`${fredoka.variable} ${bungee.variable} min-h-screen bg-background text-foreground checker-background`}>
         <AuthProvider>
           <ProtectedRoute>

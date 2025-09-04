@@ -7,18 +7,11 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check, ChevronRight } from "lucide-react";
 import { RegretFormData, RegretCategory, CATEGORIES } from "@/lib/types";
-import { getAnonymousId } from "@/lib/utils";
+import { getAnonymousId, getIconComponent } from "@/lib/utils";
 import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
 import { ID } from "appwrite";
 import toast from "react-hot-toast";
@@ -223,7 +216,10 @@ export function RegretForm({
                     selectedCategory === category.id ? "scale-110" : ""
                   }`}
                 >
-                  {category.icon}
+                  {(() => {
+                    const IconComponent = getIconComponent(category.icon);
+                    return <IconComponent className="h-8 w-8" />;
+                  })()}
                 </span>
                 <div>
                   <h4
@@ -433,7 +429,14 @@ export function RegretForm({
         <CardHeader>
           <div className="flex items-center space-x-2">
             <span className="text-lg">
-              {CATEGORIES.find((c) => c.id === form.watch("category"))?.icon}
+              {(() => {
+                const category = CATEGORIES.find((c) => c.id === form.watch("category"));
+                if (category) {
+                  const IconComponent = getIconComponent(category.icon);
+                  return <IconComponent className="h-5 w-5" />;
+                }
+                return null;
+              })()}
             </span>
             <Badge
               variant="secondary"

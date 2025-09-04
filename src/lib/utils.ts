@@ -6,8 +6,10 @@ import {
   BookOpen,
   Briefcase,
   GraduationCap,
+  Heart,
   HeartIcon,
   HelpCircle,
+  Users,
   UsersIcon,
   Wallet,
 } from "lucide-react";
@@ -131,11 +133,11 @@ export const getIconComponent = (iconName: string) => {
   const iconMap = {
     BookOpen,
     Briefcase,
-    Heart: HeartIcon,
+    Heart,
     Wallet,
     GraduationCap,
     Activity,
-    Users: UsersIcon,
+    Users,
     HelpCircle,
   };
   return iconMap[iconName as keyof typeof iconMap] || HelpCircle;

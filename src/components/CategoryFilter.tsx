@@ -5,15 +5,21 @@ import { CATEGORIES, RegretCategory } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { getIconComponent } from "@/lib/utils";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 interface CategoryFilterProps {
   selectedCategory: RegretCategory | "all";
   onCategoryChange: (category: RegretCategory | "all") => void;
+  onInternalUpdate?: () => void;
 }
 
 export function CategoryFilter({
   selectedCategory,
   onCategoryChange,
+  onInternalUpdate,
 }: CategoryFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftShadow, setShowLeftShadow] = useState(false);
   const [showRightShadow, setShowRightShadow] = useState(false);
@@ -40,6 +46,26 @@ export function CategoryFilter({
     };
   }, []);
 
+  const handleCategoryChange = (category: RegretCategory | "all") => {
+    // Signal that this is an internal update
+    onInternalUpdate?.();
+    
+    // Update the parent component state
+    onCategoryChange(category);
+    
+    // Update the URL
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", category);
+    }
+    
+    // Update URL without causing a page reload
+    const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+    router.replace(newUrl, { scroll: false });
+  };
+
   const allCategories = [
     {
       id: "all" as const,
@@ -57,7 +83,7 @@ export function CategoryFilter({
         <Tabs
           value={selectedCategory}
           onValueChange={(value) =>
-            onCategoryChange(value as RegretCategory | "all")
+            handleCategoryChange(value as RegretCategory | "all")
           }
           className="w-full"
         >
@@ -142,7 +168,7 @@ export function CategoryFilter({
         <Tabs
           value={selectedCategory}
           onValueChange={(value) =>
-            onCategoryChange(value as RegretCategory | "all")
+            handleCategoryChange(value as RegretCategory | "all")
           }
           className="w-full"
         >
@@ -161,7 +187,7 @@ export function CategoryFilter({
                   key={category.id}
                   value={category.id}
                   className={cn(
-                    "flex max-w-[80px] min-w-[70px] flex-col items-center space-y-1.5 p-2.5",
+                    "flex min-w-[70px] gap-1 items-center p-2.5 cursor-pointer",
                     // Subtle mobile active state
                     "data-[state=active]:bg-primary/8 data-[state=active]:text-primary",
                     "data-[state=active]:border-primary/20 data-[state=active]:border",

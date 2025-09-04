@@ -68,9 +68,19 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center space-x-6 lg:flex">
-            <Link href="/#stories" className={getLinkClasses("/#stories")}>
-              Browse
-            </Link>
+            {user ? (
+              <Link href="/#stories" className={getLinkClasses("/#stories")}>
+                Browse
+              </Link>
+            ) : (
+              <LoginModal 
+                trigger={
+                  <button className={getLinkClasses("/#stories")}>
+                    Browse
+                  </button>
+                }
+              />
+            )}
             <Link href="/categories" className={getLinkClasses("/categories")}>
               Categories
             </Link>
@@ -141,13 +151,26 @@ export function Header() {
         {isMobileMenuOpen && (
           <div className="border-border mt-4 border-t pb-4 lg:hidden">
             <nav className="flex flex-col space-y-3 pt-4">
-              <Link
-                href="/#stories"
-                className={getLinkClasses("/#stories", true)}
-                onClick={closeMobileMenu}
-              >
-                Browse
-              </Link>
+              {user ? (
+                <Link
+                  href="/#stories"
+                  className={getLinkClasses("/#stories", true)}
+                  onClick={closeMobileMenu}
+                >
+                  Browse
+                </Link>
+              ) : (
+                <LoginModal 
+                  trigger={
+                    <button 
+                      className={getLinkClasses("/#stories", true)}
+                      onClick={closeMobileMenu}
+                    >
+                      Browse
+                    </button>
+                  }
+                />
+              )}
               <Link
                 href="/categories"
                 className={getLinkClasses("/categories", true)}

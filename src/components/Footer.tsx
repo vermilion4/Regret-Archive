@@ -1,8 +1,12 @@
+"use client";
 import Link from "next/link";
 import { Heart, Shield, Users, Lightbulb } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/lib/auth";
+import { LoginModal } from "./LoginModal";
 
 export function Footer() {
+  const { user } = useAuth();
   return (
     <footer className="border-border bg-card/50 border-t">
       <div className="container mx-auto px-4 py-8">
@@ -24,12 +28,22 @@ export function Footer() {
             <h4 className="font-medium">Platform</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/#stories"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Browse Regrets
-                </Link>
+                {user ? (
+                  <Link
+                    href="/#stories"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Browse Regrets
+                  </Link>
+                ) : (
+                  <LoginModal 
+                    trigger={
+                      <button className="text-muted-foreground hover:text-foreground transition-colors">
+                        Browse Regrets
+                      </button>
+                    }
+                  />
+                )}
               </li>
               <li>
                 <Link

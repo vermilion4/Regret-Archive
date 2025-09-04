@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { RegretCard } from "@/components/RegretCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
@@ -45,15 +45,21 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialData }: HomePageClientProps) {
   const { user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
-  const [regrets, setRegrets] = useState<Regret[]>(initialData.featuredRegrets);
+  
+  // Initialize category from URL parameter if present
+  const initialCategory = (searchParams.get("category") as RegretCategory | "all") || "all";
+  const hasUrlCategory = !!searchParams.get("category");
+  
+  const [regrets, setRegrets] = useState<Regret[]>(
+    hasUrlCategory ? [] : initialData.featuredRegrets
+  );
   const [featuredRegret, setFeaturedRegret] = useState<Regret | null>(
-    initialData.featuredRegrets.length > 0
-      ? initialData.featuredRegrets[0]
-      : null
+    hasUrlCategory ? null : (initialData.featuredRegrets.length > 0 ? initialData.featuredRegrets[0] : null)
   );
   const [selectedCategory, setSelectedCategory] = useState<
     RegretCategory | "all"
-  >("all");
+  >(initialCategory);
+  const [isInternalUpdate, setIsInternalUpdate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<"recent" | "popular">("recent");
   const [heroInView, setHeroInView] = useState(true);
@@ -65,13 +71,24 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 6;
 
-  // Handle URL category parameter
+  // Refs to avoid stale closures
+  const selectedCategoryRef = useRef(selectedCategory);
+  const sortByRef = useRef(sortBy);
+  const currentPageRef = useRef(currentPage);
+
+  // Update refs when state changes
   useEffect(() => {
-    const categoryParam = searchParams.get("category");
-    if (categoryParam && categoryParam !== selectedCategory) {
-      setSelectedCategory(categoryParam as RegretCategory | "all");
-    }
-  }, [searchParams, selectedCategory]);
+    selectedCategoryRef.current = selectedCategory;
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    sortByRef.current = sortBy;
+  }, [sortBy]);
+
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
 
   const fetchRegrets = useCallback(async () => {
     if (!user) return; // Don't fetch if no user
@@ -79,36 +96,29 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     try {
       setLoading(true);
 
-      // Build queries for pagination
+      // Build queries for pagination using refs to avoid stale closures
       const queries = [];
 
-      if (selectedCategory !== "all") {
-        queries.push(Query.equal("category", selectedCategory));
+      if (selectedCategoryRef.current !== "all") {
+        queries.push(Query.equal("category", selectedCategoryRef.current));
       }
 
-      if (sortBy === "recent") {
+      if (sortByRef.current === "recent") {
         queries.push(Query.orderDesc("$createdAt"));
       } else {
         queries.push(Query.orderDesc("comment_count"));
       }
 
       // Add pagination
-      const offset = (currentPage - 1) * itemsPerPage;
+      const offset = (currentPageRef.current - 1) * itemsPerPage;
       queries.push(Query.offset(offset));
       queries.push(Query.limit(itemsPerPage));
 
-      // First, get total count for pagination
-      const countQueries = [...queries];
-      countQueries.pop(); // Remove limit
-      countQueries.pop(); // Remove offset
-
-      const [response, countResponse] = await Promise.all([
-        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, queries),
-        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, countQueries),
-      ]);
+      // Single API call with limit
+      const response = await databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, queries);
 
       const regretsData = response.documents as unknown as Regret[];
-      const totalCount = countResponse.total;
+      const totalCount = response.total;
 
       // Update pagination state
       setTotalItems(totalCount);
@@ -156,7 +166,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, sortBy, user, currentPage, itemsPerPage]);
+  }, [user, itemsPerPage]);
 
   // Handle page changes
   const handlePageChange = (page: number) => {
@@ -173,11 +183,33 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     setCurrentPage(1);
   }, [selectedCategory, sortBy]);
 
+  // Handle URL parameter changes (e.g., when navigating from categories page)
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    const newCategory = (categoryParam as RegretCategory | "all") || "all";
+  
+    // Skip reacting if this came from an internal tab switch
+    if (isInternalUpdate) {
+      setIsInternalUpdate(false);
+      return;
+    }
+  
+    // Only update if URL truly changed
+    if (newCategory !== selectedCategory) {
+      setRegrets([]);
+      setLoading(true);
+      setSelectedCategory(newCategory);
+      setCurrentPage(1);
+    }
+  }, [searchParams]);
+  
+
+  // Single effect to handle data fetching
   useEffect(() => {
     if (!authLoading && user) {
       fetchRegrets();
     }
-  }, [authLoading, user, fetchRegrets]);
+  }, [authLoading, user, selectedCategory, sortBy, currentPage]);
 
   // Scroll effect for hero and back to top
   useEffect(() => {
@@ -239,9 +271,6 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
                   <Button
                     size="lg"
                     className="group bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden rounded-full px-8 py-3"
-                    onClick={() => {
-                      // This will be handled by the LoginModal component
-                    }}
                   >
                     <span className="relative z-10 flex items-center">
                       Share Your Regret
@@ -250,7 +279,17 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
                     <div className="from-primary to-primary/80 absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity group-hover:opacity-100" />
                   </Button>
                 </div>
-                <LoginModal />
+                <LoginModal 
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="hover:bg-muted/50 rounded-full border-2 px-8 py-3"
+                    >
+                      Browse Stories
+                    </Button>
+                  }
+                />
               </div>
 
               {/* Stats Preview */}
@@ -574,7 +613,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         <div id="stories" className="mb-12 space-y-8">
           <CategoryFilter
             selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            onCategoryChange={(category) => {
+              // Clear regrets immediately to prevent showing wrong data during transition
+              setRegrets([]);
+              setLoading(true);
+              setSelectedCategory(category);
+            }}
+            onInternalUpdate={() => setIsInternalUpdate(true)}
           />
 
           <div className="flex items-center justify-between">

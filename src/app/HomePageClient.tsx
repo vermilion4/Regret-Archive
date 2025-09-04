@@ -205,19 +205,19 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   // Show login prompt if user is not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen relative z-10">
         {/* Hero Section for Non-Authenticated Users */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden z-10">
           {/* Background Elements */}
           <div className="from-primary/5 to-secondary/5 absolute inset-0 bg-gradient-to-br via-transparent" />
           <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 animate-pulse rounded-full opacity-60 blur-3xl" />
           <div className="bg-secondary/10 absolute right-1/4 bottom-0 h-96 w-96 animate-pulse rounded-full opacity-40 blur-3xl [animation-delay:2s]" />
 
-          <div className="relative container mx-auto px-4 pt-16 pb-16 md:pt-24 md:pb-24">
+          <div className="relative container mx-auto px-4 pt-16 pb-16 md:pt-24 md:pb-24 z-20">
             {/* Main Hero Content */}
-            <div className="mb-16 text-center">
+            <div className="mb-16 text-center relative z-20">
               <div className="relative mb-6 inline-block">
-                <h1 className="from-foreground via-foreground/95 to-foreground/90 font-bungee bg-gradient-to-r bg-clip-text text-6xl leading-tight font-bold text-transparent md:text-8xl">
+                <h1 className="font-bungee text-6xl leading-tight font-bold md:text-8xl">
                   Regret Archive
                 </h1>
                 <div className="absolute -top-4 -right-4 opacity-60">
@@ -419,8 +419,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         </div>
 
         {/* Call to Action Section */}
-        <div className="bg-muted/30 py-16">
-          <div className="container mx-auto px-4 text-center">
+        <div className="bg-muted/30 py-16 relative z-10">
+          <div className="container mx-auto px-4 text-center relative z-10">
             <h2 className="font-bungee mb-4 text-3xl font-bold md:text-4xl">
               Ready to Share Your Story?
             </h2>
@@ -452,11 +452,11 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       {/* Hero Section */}
       <div
         className={cn(
-          "relative overflow-hidden transition-all duration-700 ease-out",
+          "relative overflow-hidden transition-all duration-700 ease-out z-10",
           heroInView ? "pb-16 md:pb-24" : "pb-8"
         )}
       >
@@ -465,18 +465,18 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 animate-pulse rounded-full opacity-60 blur-3xl" />
         <div className="bg-secondary/10 absolute right-1/4 bottom-0 h-96 w-96 animate-pulse rounded-full opacity-40 blur-3xl [animation-delay:2s]" />
 
-        <div className="relative container mx-auto px-4 pt-16 md:pt-24">
+        <div className="relative container mx-auto px-4 pt-16 md:pt-24 z-20">
           {/* Main Title */}
           <div
             className={cn(
-              "mb-16 text-center transition-all duration-700",
+              "mb-16 text-center transition-all duration-700 relative z-20",
               heroInView
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-4 opacity-80"
             )}
           >
             <div className="relative mb-6 inline-block">
-              <h1 className="from-foreground via-foreground/95 to-foreground/90 font-bungee bg-gradient-to-r bg-clip-text text-6xl leading-tight font-bold text-transparent md:text-8xl">
+              <h1 className="font-bungee text-6xl leading-tight font-bold md:text-8xl">
                 Regret Archive
               </h1>
               <div className="absolute -top-4 -right-4 opacity-60">
@@ -569,7 +569,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       </div>
 
       {/* Filters and Content - Improved Spacing */}
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 relative z-10">
         {/* Filters with Better Spacing */}
         <div id="stories" className="mb-12 space-y-8">
           <CategoryFilter

@@ -91,7 +91,7 @@ export default function CategoriesClient() {
             </Link>
           </Button>
 
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-5">
             <div>
               <h1 className="font-bungee mb-4 text-4xl font-bold md:text-5xl">
                 Categories

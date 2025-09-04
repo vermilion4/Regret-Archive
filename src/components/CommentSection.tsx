@@ -1,24 +1,33 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Clock, Send, ThumbsUp } from 'lucide-react';
-import { Comment } from '@/lib/types';
-import { getAnonymousId, formatTimeAgo, safeJsonParse } from '@/lib/utils';
-import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
-import { ID, Query } from 'appwrite';
-import toast from 'react-hot-toast';
+import { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Heart, MessageCircle, Clock, Send, ThumbsUp } from "lucide-react";
+import { Comment } from "@/lib/types";
+import { getAnonymousId, formatTimeAgo, safeJsonParse } from "@/lib/utils";
+import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
+import { ID, Query } from "appwrite";
+import toast from "react-hot-toast";
 
 const commentSchema = z.object({
-  content: z.string().min(10, 'Comment must be at least 10 characters').max(500, 'Comment must be less than 500 characters'),
-  comment_type: z.enum(['support', 'similar_experience', 'advice'])
+  content: z
+    .string()
+    .min(10, "Comment must be at least 10 characters")
+    .max(500, "Comment must be less than 500 characters"),
+  comment_type: z.enum(["support", "similar_experience", "advice"]),
 });
 
 interface CommentSectionProps {
@@ -26,19 +35,25 @@ interface CommentSectionProps {
   onCommentAdded?: () => void;
 }
 
-export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps) {
+export function CommentSection({
+  regretId,
+  onCommentAdded,
+}: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [reacting, setReacting] = useState<{commentId: string, type: string} | null>(null);
+  const [reacting, setReacting] = useState<{
+    commentId: string;
+    type: string;
+  } | null>(null);
 
   const form = useForm({
     resolver: zodResolver(commentSchema),
     defaultValues: {
-      content: '',
-      comment_type: 'support' as const
-    }
+      content: "",
+      comment_type: "support" as const,
+    },
   });
 
   const fetchComments = useCallback(async () => {
@@ -47,21 +62,21 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
       const response = await databases.listDocuments(
         DATABASE_ID,
         COLLECTIONS.COMMENTS,
-        [
-          Query.equal('regret_id', regretId),
-          Query.orderDesc('$createdAt')
-        ]
+        [Query.equal("regret_id", regretId), Query.orderDesc("$createdAt")]
       );
-      
+
       // Ensure each comment has default reactions
-      const commentsWithDefaultReactions = response.documents.map(comment => ({
-        ...comment,
-        reactions: comment.reactions || JSON.stringify({ helpful: 0, heart: 0 })
-      }));
-      
+      const commentsWithDefaultReactions = response.documents.map(
+        (comment) => ({
+          ...comment,
+          reactions:
+            comment.reactions || JSON.stringify({ helpful: 0, heart: 0 }),
+        })
+      );
+
       setComments(commentsWithDefaultReactions as unknown as Comment[]);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error("Error fetching comments:", error);
     } finally {
       setLoading(false);
     }
@@ -79,38 +94,43 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
         COLLECTIONS.REGRETS,
         regretId
       );
-      
+
       const currentCount = currentRegret.comment_count || 0;
-      
+
       // Update the regret with incremented comment count
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         regretId,
         {
-          comment_count: currentCount + 1
+          comment_count: currentCount + 1,
         }
       );
-      
     } catch (error) {
-      console.error('Error updating regret comment count:', error);
+      console.error("Error updating regret comment count:", error);
     }
   };
 
-  const handleReaction = async (commentId: string, reactionType: 'helpful' | 'heart') => {
+  const handleReaction = async (
+    commentId: string,
+    reactionType: "helpful" | "heart"
+  ) => {
     try {
       setReacting({ commentId, type: reactionType });
-      
-      const comment = comments.find(c => c.$id === commentId);
+
+      const comment = comments.find((c) => c.$id === commentId);
       if (!comment) return;
 
       // Ensure default reaction values
-      const currentReactions = safeJsonParse(comment.reactions, { helpful: 0, heart: 0 });
-      
+      const currentReactions = safeJsonParse(comment.reactions, {
+        helpful: 0,
+        heart: 0,
+      });
+
       // Increment the specific reaction
       const updatedReactions = {
         ...currentReactions,
-        [reactionType]: (currentReactions[reactionType] || 0) + 1
+        [reactionType]: (currentReactions[reactionType] || 0) + 1,
       };
 
       await databases.updateDocument(
@@ -118,24 +138,27 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
         COLLECTIONS.COMMENTS,
         commentId,
         {
-          reactions: JSON.stringify(updatedReactions)
+          reactions: JSON.stringify(updatedReactions),
         }
       );
 
       await fetchComments();
-      toast.success('Thanks for your reaction!');
+      toast.success("Thanks for your reaction!");
     } catch (error) {
-      console.error('Error adding reaction:', error);
-      toast.error('Failed to add reaction. Please try again.');
+      console.error("Error adding reaction:", error);
+      toast.error("Failed to add reaction. Please try again.");
     } finally {
       setReacting(null);
     }
   };
 
-  const onSubmit = async (data: { content: string; comment_type: 'support' | 'similar_experience' | 'advice' }) => {
+  const onSubmit = async (data: {
+    content: string;
+    comment_type: "support" | "similar_experience" | "advice";
+  }) => {
     try {
       setSubmitting(true);
-      
+
       const commentData = {
         regret_id: regretId,
         content: data.content,
@@ -143,8 +166,8 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
         comment_type: data.comment_type,
         reactions: JSON.stringify({
           helpful: 0,
-          heart: 0
-        })
+          heart: 0,
+        }),
       };
 
       // Create the comment
@@ -160,19 +183,19 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
 
       form.reset();
       fetchComments();
-      
+
       // Show success message
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-      toast.success('Comment posted successfully!');
-      
+      toast.success("Comment posted successfully!");
+
       // Notify parent component that a comment was added
       if (onCommentAdded) {
         onCommentAdded();
       }
     } catch (error) {
-      console.error('Error submitting comment:', error);
-      toast.error('Failed to post comment. Please try again.');
+      console.error("Error submitting comment:", error);
+      toast.error("Failed to post comment. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -180,9 +203,21 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
 
   const getCommentTypeInfo = (type: string) => {
     const types = {
-      support: { label: 'Support', color: 'bg-green-100 text-green-800', icon: '🤗' },
-      similar_experience: { label: 'Similar Experience', color: 'bg-blue-100 text-blue-800', icon: '💭' },
-      advice: { label: 'Advice', color: 'bg-purple-100 text-purple-800', icon: '💡' }
+      support: {
+        label: "Support",
+        color: "bg-green-100 text-green-800",
+        icon: "🤗",
+      },
+      similar_experience: {
+        label: "Similar Experience",
+        color: "bg-blue-100 text-blue-800",
+        icon: "💭",
+      },
+      advice: {
+        label: "Advice",
+        color: "bg-purple-100 text-purple-800",
+        icon: "💡",
+      },
     };
     return types[type as keyof typeof types] || types.support;
   };
@@ -197,11 +232,19 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
 
       {/* Success Message */}
       {showSuccess && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-green-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
@@ -221,41 +264,47 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Comment Type</label>
+              <label className="mb-2 block text-sm font-medium">
+                Comment Type
+              </label>
               <Select
-                value={form.watch('comment_type')}
-                onValueChange={(value) => form.setValue('comment_type', value as any)}
+                value={form.watch("comment_type")}
+                onValueChange={(value) =>
+                  form.setValue("comment_type", value as any)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="support">🤗 Support</SelectItem>
-                  <SelectItem value="similar_experience">💭 Similar Experience</SelectItem>
+                  <SelectItem value="similar_experience">
+                    💭 Similar Experience
+                  </SelectItem>
                   <SelectItem value="advice">💡 Advice</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Your Comment</label>
+              <label className="mb-2 block text-sm font-medium">
+                Your Comment
+              </label>
               <Textarea
                 placeholder="Share your thoughts, support, or advice..."
                 rows={4}
-                {...form.register('content')}
+                {...form.register("content")}
               />
               {form.formState.errors.content && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.content.message}</p>
+                <p className="mt-1 text-sm text-red-500">
+                  {form.formState.errors.content.message}
+                </p>
               )}
             </div>
 
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full"
-            >
-              {submitting ? 'Posting...' : 'Post Comment'}
-              <Send className="h-4 w-4 ml-2" />
+            <Button type="submit" disabled={submitting} className="w-full">
+              {submitting ? "Posting..." : "Post Comment"}
+              <Send className="ml-2 h-4 w-4" />
             </Button>
           </form>
         </CardContent>
@@ -268,9 +317,9 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
             <Card key={i} className="animate-pulse">
               <CardContent className="p-4">
                 <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/4"></div>
-                  <div className="h-4 bg-muted rounded"></div>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="bg-muted h-4 w-1/4 rounded"></div>
+                  <div className="bg-muted h-4 rounded"></div>
+                  <div className="bg-muted h-4 w-3/4 rounded"></div>
                 </div>
               </CardContent>
             </Card>
@@ -281,8 +330,8 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
           {comments.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No comments yet</h3>
+                <MessageCircle className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                <h3 className="mb-2 text-lg font-medium">No comments yet</h3>
                 <p className="text-muted-foreground">
                   Be the first to share your thoughts and support.
                 </p>
@@ -291,44 +340,49 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
           ) : (
             comments.map((comment) => {
               const typeInfo = getCommentTypeInfo(comment.comment_type);
-              const reactions = safeJsonParse(comment.reactions, { helpful: 0, heart: 0 });
+              const reactions = safeJsonParse(comment.reactions, {
+                helpful: 0,
+                heart: 0,
+              });
               return (
                 <Card key={comment.$id}>
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="mb-3 flex items-start justify-between">
                       <div className="flex items-center space-x-2">
                         <span className="text-lg">{typeInfo.icon}</span>
                         <Badge className={typeInfo.color}>
                           {typeInfo.label}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center space-x-1">
                         <Clock className="h-3 w-3" />
-                        <span className="text-xs">{formatTimeAgo(comment.$createdAt)}</span>
+                        <span className="text-xs">
+                          {formatTimeAgo(comment.$createdAt)}
+                        </span>
                       </div>
                     </div>
-                    
-                    <p className="text-story mb-3">
-                      {comment.content}
-                    </p>
-                    
+
+                    <p className="text-story mb-3">{comment.content}</p>
+
                     <div className="flex items-center space-x-4">
                       <Button
                         variant="ghost"
                         size="sm"
                         className="flex items-center space-x-1 hover:bg-blue-50"
-                        onClick={() => handleReaction(comment.$id, 'helpful')}
+                        onClick={() => handleReaction(comment.$id, "helpful")}
                         disabled={reacting?.commentId === comment.$id}
                       >
                         <ThumbsUp className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm">{reactions.helpful || 0}</span>
+                        <span className="text-sm">
+                          {reactions.helpful || 0}
+                        </span>
                       </Button>
-                      
+
                       <Button
                         variant="ghost"
                         size="sm"
                         className="flex items-center space-x-1 hover:bg-red-50"
-                        onClick={() => handleReaction(comment.$id, 'heart')}
+                        onClick={() => handleReaction(comment.$id, "heart")}
                         disabled={reacting?.commentId === comment.$id}
                       >
                         <Heart className="h-4 w-4 text-red-500" />

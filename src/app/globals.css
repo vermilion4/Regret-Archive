@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Libertinus+Mono:ital,wght@0,400;0,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Libertinus+Mono:ital,wght@0,400;0,700&display=swap");
 @import "tailwindcss";
 
 summary::-webkit-details-marker {
@@ -9,11 +9,11 @@ summary::-webkit-details-marker {
 
 /* Hide scrollbar for mobile category filter */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 /* Smooth scrolling */
@@ -25,7 +25,8 @@ html {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(#e6e6e690 1px, transparent 1px),
+  background-image:
+    linear-gradient(#e6e6e690 1px, transparent 1px),
     linear-gradient(90deg, #e6e6e690 1px, transparent 1px);
   background-size: 3.7em 3.7em;
   mask-image: radial-gradient(ellipse at 50% 40%, black 0%, transparent 55%);
@@ -160,41 +161,50 @@ body {
 
 .regret-card:hover {
   border-color: color-mix(in oklch, var(--color-primary) 50%, transparent);
-  box-shadow: 0 10px 15px -3px color-mix(in oklch, var(--color-primary) 10%, transparent);
+  box-shadow: 0 10px 15px -3px
+    color-mix(in oklch, var(--color-primary) 10%, transparent);
 }
 
 /* Category colors */
-.category-career { 
+.category-career {
   background-color: color-mix(in oklch, oklch(from blue 90%) 20%, transparent);
   color: oklch(from blue 30%);
   border: 1px solid color-mix(in oklch, oklch(from blue 80%) 30%, transparent);
 }
-.category-relationships { 
+.category-relationships {
   background-color: color-mix(in oklch, oklch(from pink 90%) 20%, transparent);
   color: oklch(from pink 30%);
   border: 1px solid color-mix(in oklch, oklch(from pink 80%) 30%, transparent);
 }
-.category-money { 
+.category-money {
   background-color: color-mix(in oklch, oklch(from green 90%) 20%, transparent);
   color: oklch(from green 30%);
   border: 1px solid color-mix(in oklch, oklch(from green 80%) 30%, transparent);
 }
-.category-education { 
-  background-color: color-mix(in oklch, oklch(from purple 90%) 20%, transparent);
+.category-education {
+  background-color: color-mix(
+    in oklch,
+    oklch(from purple 90%) 20%,
+    transparent
+  );
   color: oklch(from purple 30%);
   border: 1px solid color-mix(in oklch, oklch(from purple 80%) 30%, transparent);
 }
-.category-health { 
+.category-health {
   background-color: color-mix(in oklch, oklch(from red 90%) 20%, transparent);
   color: oklch(from red 30%);
   border: 1px solid color-mix(in oklch, oklch(from red 80%) 30%, transparent);
 }
-.category-family { 
-  background-color: color-mix(in oklch, oklch(from orange 90%) 20%, transparent);
+.category-family {
+  background-color: color-mix(
+    in oklch,
+    oklch(from orange 90%) 20%,
+    transparent
+  );
   color: oklch(from orange 30%);
   border: 1px solid color-mix(in oklch, oklch(from orange 80%) 30%, transparent);
 }
-.category-other { 
+.category-other {
   background-color: color-mix(in oklch, oklch(from gray 90%) 20%, transparent);
   color: oklch(from gray 30%);
   border: 1px solid color-mix(in oklch, oklch(from gray 80%) 30%, transparent);

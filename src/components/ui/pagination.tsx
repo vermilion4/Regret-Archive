@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PaginationProps {
   currentPage: number;
@@ -21,13 +21,13 @@ export function Pagination({
   className,
   showInfo = true,
   totalItems,
-  itemsPerPage
+  itemsPerPage,
 }: PaginationProps) {
   // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
@@ -36,31 +36,31 @@ export function Pagination({
     } else {
       // Always show first page
       pages.push(1);
-      
+
       if (currentPage > 3) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Show pages around current page
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-      
+
       for (let i = start; i <= end; i++) {
         if (i !== 1 && i !== totalPages) {
           pages.push(i);
         }
       }
-      
+
       if (currentPage < totalPages - 2) {
-        pages.push('...');
+        pages.push("...");
       }
-      
+
       // Always show last page
       if (totalPages > 1) {
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -71,12 +71,18 @@ export function Pagination({
   }
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-4", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-between gap-4 sm:flex-row",
+        className
+      )}
+    >
       {/* Page Info */}
       {showInfo && totalItems && itemsPerPage && (
-        <div className="text-sm text-muted-foreground">
-          Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} to{' '}
-          {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} stories
+        <div className="text-muted-foreground text-sm">
+          Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}{" "}
+          to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems}{" "}
+          stories
         </div>
       )}
 
@@ -88,7 +94,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="rounded-full px-3 py-2 h-9"
+          className="h-9 rounded-full px-3 py-2"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="sr-only">Previous page</span>
@@ -97,11 +103,11 @@ export function Pagination({
         {/* Page Numbers */}
         <div className="flex items-center space-x-1">
           {pageNumbers.map((page, index) => {
-            if (page === '...') {
+            if (page === "...") {
               return (
                 <div
                   key={`ellipsis-${index}`}
-                  className="flex items-center justify-center w-9 h-9 text-muted-foreground"
+                  className="text-muted-foreground flex h-9 w-9 items-center justify-center"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </div>
@@ -118,7 +124,7 @@ export function Pagination({
                 size="sm"
                 onClick={() => onPageChange(pageNumber)}
                 className={cn(
-                  "rounded-full w-9 h-9 p-0 font-medium transition-all duration-200",
+                  "h-9 w-9 rounded-full p-0 font-medium transition-all duration-200",
                   isActive && "bg-primary text-primary-foreground shadow-md"
                 )}
               >
@@ -134,7 +140,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="rounded-full px-3 py-2 h-9"
+          className="h-9 rounded-full px-3 py-2"
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Next page</span>

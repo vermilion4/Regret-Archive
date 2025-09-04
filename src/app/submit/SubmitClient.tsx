@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { RegretForm } from '@/components/RegretForm';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Info } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { RegretForm } from "@/components/RegretForm";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Info } from "lucide-react";
 
 export default function SubmitClient() {
   const router = useRouter();
@@ -15,21 +21,22 @@ export default function SubmitClient() {
   const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
 
   const handleSubmitSuccess = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-bungee">
+        <div className="mb-8 text-center">
+          <h1 className="font-bungee mb-4 text-3xl font-bold md:text-4xl">
             Share Your Regret
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your story matters. Share your regret anonymously and help others learn from your experience.
+          <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+            Your story matters. Share your regret anonymously and help others
+            learn from your experience.
           </p>
-          
+
           {/* Guidelines Button */}
           <div className="mt-4">
             <Dialog open={isGuidelinesOpen} onOpenChange={setIsGuidelinesOpen}>
@@ -39,25 +46,29 @@ export default function SubmitClient() {
                   Community Guidelines
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-xl">Community Guidelines</DialogTitle>
+                  <DialogTitle className="text-xl">
+                    Community Guidelines
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <h4 className="font-medium text-green-600">✅ Do</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        <li>• Share personal experiences and lessons learned</li>
+                      <ul className="text-muted-foreground space-y-1 text-sm">
+                        <li>
+                          • Share personal experiences and lessons learned
+                        </li>
                         <li>• Be honest and vulnerable</li>
                         <li>• Focus on the lesson, not just the pain</li>
                         <li>• Respect others' experiences</li>
                       </ul>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h4 className="font-medium text-red-600">❌ Don't</h4>
-                      <ul className="text-sm text-muted-foreground space-y-1">
+                      <ul className="text-muted-foreground space-y-1 text-sm">
                         <li>• Share identifying information about others</li>
                         <li>• Promote harmful or illegal activities</li>
                         <li>• Use this as a platform for hate speech</li>
@@ -65,11 +76,12 @@ export default function SubmitClient() {
                       </ul>
                     </div>
                   </div>
-                  
-                  <div className="bg-muted/30 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Remember:</strong> This is a space for healing and growth. 
-                      Your story has the power to help someone else feel less alone.
+
+                  <div className="bg-muted/30 rounded-lg p-4">
+                    <p className="text-muted-foreground text-sm">
+                      <strong>Remember:</strong> This is a space for healing and
+                      growth. Your story has the power to help someone else feel
+                      less alone.
                     </p>
                   </div>
                 </div>
@@ -112,13 +124,13 @@ export default function SubmitClient() {
               <Badge variant="secondary" className="bg-primary/20 text-primary">
                 Step-by-Step
               </Badge>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 Take your time. This is a safe space.
               </span>
             </div>
           </CardHeader>
           <CardContent>
-            <RegretForm 
+            <RegretForm
               onSuccess={handleSubmitSuccess}
               isSubmitting={isSubmitting}
               setIsSubmitting={setIsSubmitting}

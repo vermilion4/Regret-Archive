@@ -1,24 +1,36 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Regret } from '@/lib/types';
-import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
-import { formatTimeAgo, getCategoryIcon, safeJsonParse } from '@/lib/utils';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Lightbulb, Clock, ArrowLeft, Share2, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
-import { CommentSection } from '@/components/CommentSection';
-import { SupportReactions } from '@/components/SupportReactions';
-import { SlidingDoorsModal } from '@/components/SlidingDoorsModal';
-import { StructuredData } from '@/components/StructuredData';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { Regret } from "@/lib/types";
+import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
+import { formatTimeAgo, getCategoryIcon, safeJsonParse } from "@/lib/utils";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Heart,
+  MessageCircle,
+  Lightbulb,
+  Clock,
+  ArrowLeft,
+  Share2,
+  ThumbsUp,
+  ThumbsDown,
+  Minus,
+} from "lucide-react";
+import { CommentSection } from "@/components/CommentSection";
+import { SupportReactions } from "@/components/SupportReactions";
+import { SlidingDoorsModal } from "@/components/SlidingDoorsModal";
+import { StructuredData } from "@/components/StructuredData";
+import Link from "next/link";
 
 interface RegretDetailClientProps {
   regretId: string;
 }
 
-export default function RegretDetailClient({ regretId }: RegretDetailClientProps) {
+export default function RegretDetailClient({
+  regretId,
+}: RegretDetailClientProps) {
   const [regret, setRegret] = useState<Regret | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSlidingDoors, setShowSlidingDoors] = useState(false);
@@ -39,7 +51,7 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
       );
       setRegret(response as unknown as Regret);
     } catch (error) {
-      console.error('Error fetching regret:', error);
+      console.error("Error fetching regret:", error);
     } finally {
       setLoading(false);
     }
@@ -48,14 +60,14 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-muted rounded w-1/3"></div>
-            <div className="h-4 bg-muted rounded w-1/4"></div>
+            <div className="bg-muted h-8 w-1/3 rounded"></div>
+            <div className="bg-muted h-4 w-1/4 rounded"></div>
             <div className="space-y-2">
-              <div className="h-4 bg-muted rounded"></div>
-              <div className="h-4 bg-muted rounded w-5/6"></div>
-              <div className="h-4 bg-muted rounded w-4/6"></div>
+              <div className="bg-muted h-4 rounded"></div>
+              <div className="bg-muted h-4 w-5/6 rounded"></div>
+              <div className="bg-muted h-4 w-4/6 rounded"></div>
             </div>
           </div>
         </div>
@@ -66,8 +78,8 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
   if (!regret) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Regret Not Found</h1>
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="mb-4 text-2xl font-bold">Regret Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The regret you're looking for doesn't exist or has been removed.
           </p>
@@ -80,13 +92,19 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
   }
 
   // Parse JSON-serialized fields safely
-  const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
-  const slidingDoors = regret.sliding_doors ? safeJsonParse(regret.sliding_doors, null) : null;
+  const reactions = safeJsonParse(regret.reactions, {
+    hugs: 0,
+    me_too: 0,
+    wisdom: 0,
+  });
+  const slidingDoors = regret.sliding_doors
+    ? safeJsonParse(regret.sliding_doors, null)
+    : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <StructuredData 
-        type="article" 
+      <StructuredData
+        type="article"
         data={{
           title: regret.title,
           description: regret.lesson || regret.story.substring(0, 200),
@@ -94,14 +112,20 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
           dateModified: regret.$updatedAt || regret.$createdAt,
           url: `https://regret-archive.appwrite.network/regret/${regret.$id}`,
           category: regret.category,
-          keywords: ['regret story', 'life lesson', 'personal growth', regret.category, 'anonymous story']
-        }} 
+          keywords: [
+            "regret story",
+            "life lesson",
+            "personal growth",
+            regret.category,
+            "anonymous story",
+          ],
+        }}
       />
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Back Button */}
         <Button variant="ghost" asChild className="mb-6">
           <Link href="/">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Regrets
           </Link>
         </Button>
@@ -111,8 +135,13 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
           <CardHeader className="space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
-                <span className="text-2xl">{getCategoryIcon(regret.category)}</span>
-                <Badge variant="secondary" className={`category-${regret.category}`}>
+                <span className="text-2xl">
+                  {getCategoryIcon(regret.category)}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className={`category-${regret.category}`}
+                >
                   {regret.category}
                 </Badge>
               </div>
@@ -124,11 +153,11 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
             </div>
 
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              <h1 className="mb-4 text-3xl font-bold md:text-4xl">
                 {regret.title}
               </h1>
-              
-              <div className="flex items-center space-x-4 text-meta">
+
+              <div className="text-meta flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4" />
                   <span>{formatTimeAgo(regret.$createdAt)}</span>
@@ -136,9 +165,7 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
                 {regret.age_when_happened && (
                   <span>Age {regret.age_when_happened}</span>
                 )}
-                {regret.years_ago && (
-                  <span>{regret.years_ago} years ago</span>
-                )}
+                {regret.years_ago && <span>{regret.years_ago} years ago</span>}
               </div>
             </div>
           </CardHeader>
@@ -146,9 +173,9 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
           <CardContent className="space-y-8">
             {/* Story */}
             <div>
-              <h2 className="text-xl font-semibold mb-4">The Story</h2>
+              <h2 className="mb-4 text-xl font-semibold">The Story</h2>
               <div className="text-story leading-relaxed">
-                {regret.story.split('\n').map((paragraph, index) => (
+                {regret.story.split("\n").map((paragraph, index) => (
                   <p key={index} className="mb-4">
                     {paragraph}
                   </p>
@@ -157,8 +184,8 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
             </div>
 
             {/* Lesson Learned */}
-            <div className="bg-muted/30 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Lesson Learned</h2>
+            <div className="bg-muted/30 rounded-lg p-6">
+              <h2 className="mb-4 text-xl font-semibold">Lesson Learned</h2>
               <blockquote className="text-quote text-lg">
                 "{regret.lesson}"
               </blockquote>
@@ -166,18 +193,18 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
 
             {/* Sliding Doors */}
             {slidingDoors && (
-              <div className="border border-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Sliding Doors</h2>
+              <div className="border-border rounded-lg border p-6">
+                <h2 className="mb-4 text-xl font-semibold">Sliding Doors</h2>
                 <p className="text-story mb-4">
                   <strong>What could have been different:</strong>
                 </p>
-                <p className="text-story mb-6">
-                  {slidingDoors.alternate_path}
-                </p>
-                
+                <p className="text-story mb-6">{slidingDoors.alternate_path}</p>
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Would this have been better?</span>
+                    <span className="text-muted-foreground text-sm">
+                      Would this have been better?
+                    </span>
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="outline"
@@ -213,7 +240,7 @@ export default function RegretDetailClient({ regretId }: RegretDetailClientProps
             <SupportReactions regret={regret} onUpdate={fetchRegret} />
 
             {/* Stats */}
-            <div className="flex items-center justify-between text-meta">
+            <div className="text-meta flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-1">
                   <Heart className="h-4 w-4 text-red-500" />

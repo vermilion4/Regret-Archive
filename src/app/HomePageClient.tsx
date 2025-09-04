@@ -1,22 +1,33 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { RegretCard } from '@/components/RegretCard';
-import { CategoryFilter } from '@/components/CategoryFilter';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Pagination } from '@/components/ui/pagination';
-import { Heart, MessageCircle, Lightbulb, TrendingUp, Clock, Users, Sparkles, ArrowRight, ArrowUp, FileText } from 'lucide-react';
-import { Regret, RegretCategory } from '@/lib/types';
-import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
-import { Query } from 'appwrite';
-import { useAuth } from '@/lib/auth';
-import { LoginModal } from '@/components/LoginModal';
-import { cn, safeJsonParse } from '@/lib/utils';
-import { RegretOfTheDay } from '@/components/RegretOfTheDay';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { RegretCard } from "@/components/RegretCard";
+import { CategoryFilter } from "@/components/CategoryFilter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import {
+  Heart,
+  MessageCircle,
+  Lightbulb,
+  TrendingUp,
+  Clock,
+  Users,
+  Sparkles,
+  ArrowRight,
+  ArrowUp,
+  FileText,
+} from "lucide-react";
+import { Regret, RegretCategory } from "@/lib/types";
+import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
+import { Query } from "appwrite";
+import { useAuth } from "@/lib/auth";
+import { LoginModal } from "@/components/LoginModal";
+import { cn, safeJsonParse } from "@/lib/utils";
+import { RegretOfTheDay } from "@/components/RegretOfTheDay";
+import Link from "next/link";
 
 interface HomePageData {
   featuredRegrets: Regret[];
@@ -36,14 +47,18 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   const searchParams = useSearchParams();
   const [regrets, setRegrets] = useState<Regret[]>(initialData.featuredRegrets);
   const [featuredRegret, setFeaturedRegret] = useState<Regret | null>(
-    initialData.featuredRegrets.length > 0 ? initialData.featuredRegrets[0] : null
+    initialData.featuredRegrets.length > 0
+      ? initialData.featuredRegrets[0]
+      : null
   );
-  const [selectedCategory, setSelectedCategory] = useState<RegretCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    RegretCategory | "all"
+  >("all");
   const [loading, setLoading] = useState(false);
-  const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
+  const [sortBy, setSortBy] = useState<"recent" | "popular">("recent");
   const [heroInView, setHeroInView] = useState(true);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -52,31 +67,31 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
   // Handle URL category parameter
   useEffect(() => {
-    const categoryParam = searchParams.get('category');
+    const categoryParam = searchParams.get("category");
     if (categoryParam && categoryParam !== selectedCategory) {
-      setSelectedCategory(categoryParam as RegretCategory | 'all');
+      setSelectedCategory(categoryParam as RegretCategory | "all");
     }
   }, [searchParams, selectedCategory]);
 
   const fetchRegrets = useCallback(async () => {
     if (!user) return; // Don't fetch if no user
-    
+
     try {
       setLoading(true);
-      
+
       // Build queries for pagination
       const queries = [];
-      
-      if (selectedCategory !== 'all') {
-        queries.push(Query.equal('category', selectedCategory));
+
+      if (selectedCategory !== "all") {
+        queries.push(Query.equal("category", selectedCategory));
       }
-      
-      if (sortBy === 'recent') {
-        queries.push(Query.orderDesc('$createdAt'));
+
+      if (sortBy === "recent") {
+        queries.push(Query.orderDesc("$createdAt"));
       } else {
-        queries.push(Query.orderDesc('comment_count'));
+        queries.push(Query.orderDesc("comment_count"));
       }
-      
+
       // Add pagination
       const offset = (currentPage - 1) * itemsPerPage;
       queries.push(Query.offset(offset));
@@ -86,20 +101,20 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       const countQueries = [...queries];
       countQueries.pop(); // Remove limit
       countQueries.pop(); // Remove offset
-      
+
       const [response, countResponse] = await Promise.all([
         databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, queries),
-        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, countQueries)
+        databases.listDocuments(DATABASE_ID, COLLECTIONS.REGRETS, countQueries),
       ]);
 
       const regretsData = response.documents as unknown as Regret[];
       const totalCount = countResponse.total;
-      
+
       // Update pagination state
       setTotalItems(totalCount);
       setTotalPages(Math.ceil(totalCount / itemsPerPage));
-      
-      const processedRegrets = regretsData.map(regret => {
+
+      const processedRegrets = regretsData.map((regret) => {
         // Ensure reactions is valid JSON
         let reactions = regret.reactions;
         if (!reactions) {
@@ -107,21 +122,29 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         } else {
           // Try to parse and re-stringify to ensure it's valid JSON
           try {
-            const parsed = safeJsonParse(reactions, { hugs: 0, me_too: 0, wisdom: 0 });
+            const parsed = safeJsonParse(reactions, {
+              hugs: 0,
+              me_too: 0,
+              wisdom: 0,
+            });
             reactions = JSON.stringify(parsed);
           } catch (error) {
-            console.warn('Invalid reactions JSON for regret:', regret.$id, reactions);
+            console.warn(
+              "Invalid reactions JSON for regret:",
+              regret.$id,
+              reactions
+            );
             reactions = JSON.stringify({ hugs: 0, me_too: 0, wisdom: 0 });
           }
         }
-        
+
         return {
           ...regret,
           reactions,
-          comment_count: regret.comment_count || 0
+          comment_count: regret.comment_count || 0,
         };
       });
-      
+
       setRegrets(processedRegrets);
 
       // Set featured regret from first page only
@@ -129,7 +152,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         setFeaturedRegret(processedRegrets[0]);
       }
     } catch (error) {
-      console.error('Error fetching regrets:', error);
+      console.error("Error fetching regrets:", error);
     } finally {
       setLoading(false);
     }
@@ -139,9 +162,9 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Scroll to top of stories section when changing pages
-    const storiesSection = document.getElementById('stories');
+    const storiesSection = document.getElementById("stories");
     if (storiesSection) {
-      storiesSection.scrollIntoView({ behavior: 'smooth' });
+      storiesSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -164,8 +187,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       setShowBackToTop(scrollY > 500);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // No need for client-side filtering since we're doing it in the database query
@@ -173,8 +196,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   // Show loading state while auth is loading
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
       </div>
     );
   }
@@ -186,176 +209,207 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         {/* Hero Section for Non-Authenticated Users */}
         <div className="relative overflow-hidden">
           {/* Background Elements */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-60 animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-40 animate-pulse [animation-delay:2s]" />
-          
-          <div className="relative container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-24">
+          <div className="from-primary/5 to-secondary/5 absolute inset-0 bg-gradient-to-br via-transparent" />
+          <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 animate-pulse rounded-full opacity-60 blur-3xl" />
+          <div className="bg-secondary/10 absolute right-1/4 bottom-0 h-96 w-96 animate-pulse rounded-full opacity-40 blur-3xl [animation-delay:2s]" />
+
+          <div className="relative container mx-auto px-4 pt-16 pb-16 md:pt-24 md:pb-24">
             {/* Main Hero Content */}
-            <div className="text-center mb-16">
-              <div className="relative inline-block mb-6">
-                <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight font-bungee">
+            <div className="mb-16 text-center">
+              <div className="relative mb-6 inline-block">
+                <h1 className="from-foreground via-foreground/95 to-foreground/90 font-bungee bg-gradient-to-r bg-clip-text text-6xl leading-tight font-bold text-transparent md:text-8xl">
                   Regret Archive
                 </h1>
                 <div className="absolute -top-4 -right-4 opacity-60">
-                  <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+                  <Sparkles className="text-primary h-8 w-8 animate-pulse" />
                 </div>
               </div>
-              
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
-                A safe, anonymous space to share regrets and life lessons.<br />
-                <span className="text-foreground/80 font-medium">Connect with others who understand your experiences.</span>
+
+              <p className="text-muted-foreground mx-auto mb-8 max-w-3xl text-xl leading-relaxed md:text-2xl">
+                A safe, anonymous space to share regrets and life lessons.
+                <br />
+                <span className="text-foreground/80 font-medium">
+                  Connect with others who understand your experiences.
+                </span>
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <div className="text-center">
-                  <Button 
-                    size="lg" 
-                    className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full"
+                  <Button
+                    size="lg"
+                    className="group bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden rounded-full px-8 py-3"
                     onClick={() => {
                       // This will be handled by the LoginModal component
                     }}
                   >
                     <span className="relative z-10 flex items-center">
                       Share Your Regret
-                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="from-primary to-primary/80 absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity group-hover:opacity-100" />
                   </Button>
                 </div>
                 <LoginModal />
               </div>
 
               {/* Stats Preview */}
-              <div className="grid grid-cols-3 gap-8 max-w-md mx-auto">
+              <div className="mx-auto grid max-w-md grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                  <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
                     {initialData.stats.totalStories}+
                   </div>
-                  <div className="text-sm text-muted-foreground">Stories</div>
+                  <div className="text-muted-foreground text-sm">Stories</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                  <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
                     {initialData.stats.totalReactions}+
                   </div>
-                  <div className="text-sm text-muted-foreground">Reactions</div>
+                  <div className="text-muted-foreground text-sm">Reactions</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                  <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
                     {initialData.stats.totalComments}+
                   </div>
-                  <div className="text-sm text-muted-foreground">Comments</div>
+                  <div className="text-muted-foreground text-sm">Comments</div>
                 </div>
               </div>
             </div>
 
             {/* Features Showcase */}
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              <Card className="group hover:shadow-lg transition-all duration-300 border-2 border-border/50 hover:border-primary/30">
+            <div className="mb-16 grid gap-8 md:grid-cols-3">
+              <Card className="group border-border/50 hover:border-primary/30 border-2 transition-all duration-300 hover:shadow-lg">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Heart className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 group-hover:bg-primary/20 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-colors">
+                    <Heart className="text-primary h-6 w-6" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Safe & Anonymous</h3>
+                  <h3 className="mb-2 text-lg font-semibold">
+                    Safe & Anonymous
+                  </h3>
                   <p className="text-muted-foreground text-sm">
-                    Share your deepest regrets without revealing your identity. Your privacy is our priority.
+                    Share your deepest regrets without revealing your identity.
+                    Your privacy is our priority.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group hover:shadow-lg transition-all duration-300 border-2 border-border/50 hover:border-primary/30">
+              <Card className="group border-border/50 hover:border-primary/30 border-2 transition-all duration-300 hover:shadow-lg">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Users className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 group-hover:bg-primary/20 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-colors">
+                    <Users className="text-primary h-6 w-6" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Community Support</h3>
+                  <h3 className="mb-2 text-lg font-semibold">
+                    Community Support
+                  </h3>
                   <p className="text-muted-foreground text-sm">
-                    Connect with others who understand. Find comfort in shared experiences and wisdom.
+                    Connect with others who understand. Find comfort in shared
+                    experiences and wisdom.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group hover:shadow-lg transition-all duration-300 border-2 border-border/50 hover:border-primary/30">
+              <Card className="group border-border/50 hover:border-primary/30 border-2 transition-all duration-300 hover:shadow-lg">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Lightbulb className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 group-hover:bg-primary/20 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-colors">
+                    <Lightbulb className="text-primary h-6 w-6" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Learn & Grow</h3>
+                  <h3 className="mb-2 text-lg font-semibold">Learn & Grow</h3>
                   <p className="text-muted-foreground text-sm">
-                    Turn regrets into lessons. Help others avoid similar mistakes and grow together.
+                    Turn regrets into lessons. Help others avoid similar
+                    mistakes and grow together.
                   </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Sample Regret Preview */}
-            <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2 font-bungee">Featured Story</h2>
-                <p className="text-muted-foreground">See what others are sharing</p>
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-8 text-center">
+                <h2 className="font-bungee mb-2 text-2xl font-bold md:text-3xl">
+                  Featured Story
+                </h2>
+                <p className="text-muted-foreground">
+                  See what others are sharing
+                </p>
               </div>
-              
+
               {initialData.featuredRegrets.length > 0 ? (
-                <Card className="border-2 border-primary/20 shadow-lg">
+                <Card className="border-primary/20 border-2 shadow-lg">
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                       <Badge variant="secondary" className="text-xs">
                         {initialData.featuredRegrets[0].category}
                       </Badge>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(initialData.featuredRegrets[0].$createdAt).toLocaleDateString()}
+                      <div className="text-muted-foreground text-xs">
+                        {new Date(
+                          initialData.featuredRegrets[0].$createdAt
+                        ).toLocaleDateString()}
                       </div>
                     </div>
                     <p className="text-foreground mb-4 leading-relaxed">
                       "{initialData.featuredRegrets[0].title}"
                     </p>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-4">
                         <span className="flex items-center">
-                          <Heart className="h-4 w-4 mr-1" />
+                          <Heart className="mr-1 h-4 w-4" />
                           {(() => {
                             try {
-                              const reactions = JSON.parse(initialData.featuredRegrets[0].reactions || '{}');
-                              return (reactions.hugs || 0) + (reactions.me_too || 0) + (reactions.wisdom || 0);
+                              const reactions = JSON.parse(
+                                initialData.featuredRegrets[0].reactions || "{}"
+                              );
+                              return (
+                                (reactions.hugs || 0) +
+                                (reactions.me_too || 0) +
+                                (reactions.wisdom || 0)
+                              );
                             } catch {
                               return 0;
                             }
                           })()}
                         </span>
                         <span className="flex items-center">
-                          <MessageCircle className="h-4 w-4 mr-1" />
+                          <MessageCircle className="mr-1 h-4 w-4" />
                           {initialData.featuredRegrets[0].comment_count || 0}
                         </span>
                       </div>
-                      <span className="text-primary font-medium">Anonymous</span>
+                      <span className="text-primary font-medium">
+                        Anonymous
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
               ) : (
-                <Card className="border-2 border-primary/20 shadow-lg">
+                <Card className="border-primary/20 border-2 shadow-lg">
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge variant="secondary" className="text-xs">Career</Badge>
-                      <div className="text-xs text-muted-foreground">2 days ago</div>
+                    <div className="mb-4 flex items-center justify-between">
+                      <Badge variant="secondary" className="text-xs">
+                        Career
+                      </Badge>
+                      <div className="text-muted-foreground text-xs">
+                        2 days ago
+                      </div>
                     </div>
                     <p className="text-foreground mb-4 leading-relaxed">
-                      "I wish I had pursued my passion for art instead of following the 'safe' career path. 
-                      Now I'm stuck in a job I don't love, wondering what could have been. 
-                      To anyone reading this: don't let fear of failure stop you from chasing your dreams."
+                      "I wish I had pursued my passion for art instead of
+                      following the 'safe' career path. Now I'm stuck in a job I
+                      don't love, wondering what could have been. To anyone
+                      reading this: don't let fear of failure stop you from
+                      chasing your dreams."
                     </p>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-4">
                         <span className="flex items-center">
-                          <Heart className="h-4 w-4 mr-1" />
+                          <Heart className="mr-1 h-4 w-4" />
                           24
                         </span>
                         <span className="flex items-center">
-                          <MessageCircle className="h-4 w-4 mr-1" />
-                          8
+                          <MessageCircle className="mr-1 h-4 w-4" />8
                         </span>
                       </div>
-                      <span className="text-primary font-medium">Anonymous</span>
+                      <span className="text-primary font-medium">
+                        Anonymous
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -367,16 +421,27 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         {/* Call to Action Section */}
         <div className="bg-muted/30 py-16">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-bungee">Ready to Share Your Story?</h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join our community and help others learn from your experiences. 
+            <h2 className="font-bungee mb-4 text-3xl font-bold md:text-4xl">
+              Ready to Share Your Story?
+            </h2>
+            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-xl">
+              Join our community and help others learn from your experiences.
               Your story could be the one that changes someone's life.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full" asChild>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 py-3"
+                asChild
+              >
                 <Link href="/submit">Get Started Now</Link>
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-3 rounded-full border-2" asChild>
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full border-2 px-8 py-3"
+                asChild
+              >
                 <Link href="/categories">Learn More</Link>
               </Button>
             </div>
@@ -389,85 +454,116 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className={cn(
-        "relative overflow-hidden transition-all duration-700 ease-out",
-        heroInView ? "pb-16 md:pb-24" : "pb-8"
-      )}>
+      <div
+        className={cn(
+          "relative overflow-hidden transition-all duration-700 ease-out",
+          heroInView ? "pb-16 md:pb-24" : "pb-8"
+        )}
+      >
         {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-60 animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-40 animate-pulse [animation-delay:2s]" />
-        
+        <div className="from-primary/5 to-secondary/5 absolute inset-0 bg-gradient-to-br via-transparent" />
+        <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 animate-pulse rounded-full opacity-60 blur-3xl" />
+        <div className="bg-secondary/10 absolute right-1/4 bottom-0 h-96 w-96 animate-pulse rounded-full opacity-40 blur-3xl [animation-delay:2s]" />
+
         <div className="relative container mx-auto px-4 pt-16 md:pt-24">
           {/* Main Title */}
-          <div className={cn(
-            "text-center mb-16 transition-all duration-700",
-            heroInView ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-80"
-          )}>
-            <div className="relative inline-block mb-6">
-              <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight font-bungee">
+          <div
+            className={cn(
+              "mb-16 text-center transition-all duration-700",
+              heroInView
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-4 opacity-80"
+            )}
+          >
+            <div className="relative mb-6 inline-block">
+              <h1 className="from-foreground via-foreground/95 to-foreground/90 font-bungee bg-gradient-to-r bg-clip-text text-6xl leading-tight font-bold text-transparent md:text-8xl">
                 Regret Archive
               </h1>
               <div className="absolute -top-4 -right-4 opacity-60">
-                <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+                <Sparkles className="text-primary h-8 w-8 animate-pulse" />
               </div>
             </div>
-            
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
-              A safe, anonymous space to share regrets and life lessons.<br />
-              <span className="text-foreground/80 font-medium">Connect with others who understand your experiences.</span>
+
+            <p className="text-muted-foreground mx-auto mb-6 max-w-3xl text-lg leading-relaxed md:text-xl">
+              A safe, anonymous space to share regrets and life lessons.
+              <br />
+              <span className="text-foreground/80 font-medium">
+                Connect with others who understand your experiences.
+              </span>
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full" asChild>
+            <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden rounded-full px-8 py-3"
+                asChild
+              >
                 <a href="/submit">
                   <span className="relative z-10 flex items-center">
                     Share Your Regret
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="from-primary to-primary/80 absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity group-hover:opacity-100" />
                 </a>
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-3 rounded-full border-2 hover:bg-muted/50" asChild>
-                <a href="#stories">
-                  Browse Stories
-                </a>
+              <Button
+                variant="outline"
+                size="lg"
+                className="hover:bg-muted/50 rounded-full border-2 px-8 py-3"
+                asChild
+              >
+                <a href="#stories">Browse Stories</a>
               </Button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 max-w-md mx-auto">
+            <div className="mx-auto grid max-w-md grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
                   {totalItems || regrets.length}
                 </div>
-                <div className="text-sm text-muted-foreground">Stories</div>
+                <div className="text-muted-foreground text-sm">Stories</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
                   {(() => {
                     const totalReactions = regrets.reduce((acc, regret) => {
-                      const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
-                      return acc + Number(reactions.hugs || 0) + Number(reactions.me_too || 0) + Number(reactions.wisdom || 0);
+                      const reactions = safeJsonParse(regret.reactions, {
+                        hugs: 0,
+                        me_too: 0,
+                        wisdom: 0,
+                      });
+                      return (
+                        acc +
+                        Number(reactions.hugs || 0) +
+                        Number(reactions.me_too || 0) +
+                        Number(reactions.wisdom || 0)
+                      );
                     }, 0);
                     return totalReactions;
                   })()}
                 </div>
-                <div className="text-sm text-muted-foreground">Reactions</div>
+                <div className="text-muted-foreground text-sm">Reactions</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                  {regrets.reduce((acc, regret) => acc + regret.comment_count, 0)}
+                <div className="text-foreground mb-1 text-2xl font-bold md:text-3xl">
+                  {regrets.reduce(
+                    (acc, regret) => acc + regret.comment_count,
+                    0
+                  )}
                 </div>
-                <div className="text-sm text-muted-foreground">Comments</div>
+                <div className="text-muted-foreground text-sm">Comments</div>
               </div>
             </div>
           </div>
 
           {/* Featured Regret - Redesigned */}
           {featuredRegret && (
-            <RegretOfTheDay featuredRegret={featuredRegret} onUpdate={fetchRegrets} />
+            <RegretOfTheDay
+              featuredRegret={featuredRegret}
+              onUpdate={fetchRegrets}
+            />
           )}
         </div>
       </div>
@@ -476,34 +572,34 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       <div className="container mx-auto px-4">
         {/* Filters with Better Spacing */}
         <div id="stories" className="mb-12 space-y-8">
-          <CategoryFilter 
+          <CategoryFilter
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
           />
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Button
-                variant={sortBy === 'recent' ? 'default' : 'outline'}
+                variant={sortBy === "recent" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSortBy('recent')}
+                onClick={() => setSortBy("recent")}
                 className="rounded-full px-6"
               >
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="mr-2 h-4 w-4" />
                 Recent
               </Button>
               <Button
-                variant={sortBy === 'popular' ? 'default' : 'outline'}
+                variant={sortBy === "popular" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSortBy('popular')}
+                onClick={() => setSortBy("popular")}
                 className="rounded-full px-6"
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="mr-2 h-4 w-4" />
                 Popular
               </Button>
             </div>
-            
-            <div className="text-sm text-muted-foreground bg-muted/30 px-4 py-2 rounded-full">
+
+            <div className="text-muted-foreground bg-muted/30 rounded-full px-4 py-2 text-sm">
               {totalItems || regrets.length} stories
             </div>
           </div>
@@ -511,14 +607,14 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
         {/* Regrets Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+          <div className="mb-16 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
-                <div className="p-6 space-y-4">
-                  <div className="h-8 bg-muted rounded w-3/4"></div>
+                <div className="space-y-4 p-6">
+                  <div className="bg-muted h-8 w-3/4 rounded"></div>
                   <div className="space-y-2">
-                    <div className="h-8 bg-muted rounded"></div>
-                    <div className="h-8 bg-muted rounded w-5/6"></div>
+                    <div className="bg-muted h-8 rounded"></div>
+                    <div className="bg-muted h-8 w-5/6 rounded"></div>
                   </div>
                 </div>
               </Card>
@@ -526,12 +622,16 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 items-stretch">
+            <div className="mb-8 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 lg:grid-cols-3">
               {regrets.map((regret) => (
-                <RegretCard key={regret.$id} regret={regret} onUpdate={fetchRegrets} />
+                <RegretCard
+                  key={regret.$id}
+                  regret={regret}
+                  onUpdate={fetchRegrets}
+                />
               ))}
             </div>
-            
+
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mb-16">
@@ -549,16 +649,15 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         )}
 
         {!loading && regrets.length === 0 && (
-          <div className="text-center py-20">
+          <div className="py-20 text-center">
             <div className="mb-8 opacity-60">
-              <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+              <FileText className="text-muted-foreground mx-auto h-16 w-16" />
             </div>
-            <h3 className="text-2xl font-semibold mb-4">No stories found</h3>
-            <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
-              {selectedCategory === 'all' 
-                ? 'Be the first to share a regret and help others learn from your experience.'
-                : `No regrets found in the ${selectedCategory} category yet.`
-              }
+            <h3 className="mb-4 text-2xl font-semibold">No stories found</h3>
+            <p className="text-muted-foreground mx-auto mb-8 max-w-md text-lg">
+              {selectedCategory === "all"
+                ? "Be the first to share a regret and help others learn from your experience."
+                : `No regrets found in the ${selectedCategory} category yet.`}
             </p>
             <Button size="lg" className="rounded-full px-8" asChild>
               <a href="/submit">Share Your Story</a>
@@ -570,8 +669,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       {/* Back to Top Button */}
       {showBackToTop && (
         <Button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 z-50 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-200"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed right-8 bottom-8 z-50 h-12 w-12 rounded-full p-0 shadow-lg transition-all duration-200 hover:shadow-xl"
           size="icon"
         >
           <ArrowUp className="h-5 w-5" />

@@ -8,11 +8,11 @@ const account = new Account(client);
 const databases = new Databases(client);
 
 // Database and collection IDs
-export const DATABASE_ID = 'regret-archive';
+export const DATABASE_ID = "regret-archive";
 export const COLLECTIONS = {
-  REGRETS: 'regrets',
-  COMMENTS: 'comments',
-  REACTIONS: 'reactions'
+  REGRETS: "regrets",
+  COMMENTS: "comments",
+  REACTIONS: "reactions",
 } as const;
 
 export { client, account, databases, ID };

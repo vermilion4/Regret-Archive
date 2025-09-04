@@ -29,7 +29,15 @@
           "type": "string",
           "required": true,
           "size": 255,
-          "enum": ["career", "relationships", "money", "education", "health", "family", "other"]
+          "enum": [
+            "career",
+            "relationships",
+            "money",
+            "education",
+            "health",
+            "family",
+            "other"
+          ]
         },
         {
           "key": "age_when_happened",
@@ -138,59 +146,6 @@
           "key": "created_at",
           "type": "key",
           "attributes": ["$createdAt"]
-        }
-      ],
-      "permissions": [
-        "read('any')",
-        "create('any')",
-        "update('any')",
-        "delete('any')"
-      ]
-    },
-    "reactions": {
-      "name": "Reactions",
-      "attributes": [
-        {
-          "key": "target_id",
-          "type": "string",
-          "required": true,
-          "size": 255
-        },
-        {
-          "key": "target_type",
-          "type": "string",
-          "required": true,
-          "size": 255,
-          "enum": ["regret", "comment"]
-        },
-        {
-          "key": "reaction_type",
-          "type": "string",
-          "required": true,
-          "size": 255
-        },
-        {
-          "key": "anonymous_id",
-          "type": "string",
-          "required": true,
-          "size": 255
-        }
-      ],
-      "indexes": [
-        {
-          "key": "target_id",
-          "type": "key",
-          "attributes": ["target_id"]
-        },
-        {
-          "key": "target_type",
-          "type": "key",
-          "attributes": ["target_type"]
-        },
-        {
-          "key": "anonymous_id",
-          "type": "key",
-          "attributes": ["anonymous_id"]
         }
       ],
       "permissions": [

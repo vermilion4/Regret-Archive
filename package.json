@@ -2,13 +2,17 @@
   "name": "regret-archive",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "setup-db": "node scripts/setup-database.js",
     "fix-json": "node scripts/fix-json-data.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write"
   },
   "dependencies": {
     "@appwrite.io/pink-icons": "^1.0.0",

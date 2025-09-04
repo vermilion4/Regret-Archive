@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { account, ID } from '@/lib/appwrite';
-import { Models } from 'appwrite';
+import { createContext, useContext, useEffect, useState } from "react";
+import { account, ID } from "@/lib/appwrite";
+import { Models } from "appwrite";
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -16,7 +16,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await account.createEmailPasswordSession({
         email,
-        password
+        password,
       });
       await checkUser();
     } catch (error) {
@@ -55,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         userId: ID.unique(),
         email,
         password,
-        name
+        name,
       });
       // Delete the anonymous session before logging in
       // await account.deleteSession('current');
@@ -67,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await account.deleteSession('current');
+      await account.deleteSession("current");
       setUser(null);
     } catch (error) {
       throw error;
@@ -84,7 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, createAnonymousSession }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, logout, createAnonymousSession }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -93,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

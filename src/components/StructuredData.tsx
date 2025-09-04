@@ -1,89 +1,90 @@
-import Script from 'next/script';
+import Script from "next/script";
 
 interface StructuredDataProps {
-  type: 'website' | 'article' | 'organization' | 'breadcrumb';
+  type: "website" | "article" | "organization" | "breadcrumb";
   data: any;
 }
 
 export function StructuredData({ type, data }: StructuredDataProps) {
   const getStructuredData = () => {
     switch (type) {
-      case 'website':
+      case "website":
         return {
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "Regret Archive",
-          "description": "A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.",
-          "url": "https://regret-archive.appwrite.network",
-          "potentialAction": {
+          name: "Regret Archive",
+          description:
+            "A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.",
+          url: "https://regret-archive.appwrite.network",
+          potentialAction: {
             "@type": "SearchAction",
-            "target": "https://regret-archive.appwrite.network/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
+            target:
+              "https://regret-archive.appwrite.network/search?q={search_term_string}",
+            "query-input": "required name=search_term_string",
           },
-          "publisher": {
+          publisher: {
             "@type": "Organization",
-            "name": "Regret Archive",
-            "url": "https://regret-archive.appwrite.network"
-          }
+            name: "Regret Archive",
+            url: "https://regret-archive.appwrite.network",
+          },
         };
 
-      case 'article':
+      case "article":
         return {
           "@context": "https://schema.org",
           "@type": "Article",
-          "headline": data.title,
-          "description": data.description,
-          "datePublished": data.datePublished,
-          "dateModified": data.dateModified || data.datePublished,
-          "author": {
+          headline: data.title,
+          description: data.description,
+          datePublished: data.datePublished,
+          dateModified: data.dateModified || data.datePublished,
+          author: {
             "@type": "Person",
-            "name": "Anonymous"
+            name: "Anonymous",
           },
-          "publisher": {
+          publisher: {
             "@type": "Organization",
-            "name": "Regret Archive",
-            "url": "https://regret-archive.appwrite.network"
+            name: "Regret Archive",
+            url: "https://regret-archive.appwrite.network",
           },
-          "mainEntityOfPage": {
+          mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": data.url
+            "@id": data.url,
           },
-          "articleSection": data.category,
-          "keywords": data.keywords?.join(', '),
-          "about": {
+          articleSection: data.category,
+          keywords: data.keywords?.join(", "),
+          about: {
             "@type": "Thing",
-            "name": data.category
-          }
+            name: data.category,
+          },
         };
 
-      case 'organization':
+      case "organization":
         return {
           "@context": "https://schema.org",
           "@type": "Organization",
-          "name": "Regret Archive",
-          "description": "A safe, anonymous platform for sharing regrets and life lessons",
-          "url": "https://regret-archive.appwrite.network",
-          "logo": "https://regret-archive.appwrite.network/logo.png",
-          "sameAs": [
-            "https://twitter.com/regretarchive"
-          ],
-          "contactPoint": {
+          name: "Regret Archive",
+          description:
+            "A safe, anonymous platform for sharing regrets and life lessons",
+          url: "https://regret-archive.appwrite.network",
+          logo: "https://regret-archive.appwrite.network/logo.png",
+          sameAs: ["https://twitter.com/regretarchive"],
+          contactPoint: {
             "@type": "ContactPoint",
-            "contactType": "customer service",
-            "availableLanguage": "English"
-          }
+            contactType: "customer service",
+            availableLanguage: "English",
+          },
         };
 
-      case 'breadcrumb':
+      case "breadcrumb":
         return {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
-          "itemListElement": data.items.map((item: any, index: number) => ({
+          itemListElement: data.items.map((item: any, index: number) => ({
             "@type": "ListItem",
-            "position": index + 1,
-            "name": item.name,
-            "item": item.url
-          }))
+            position: index + 1,
+            name: item.name,
+            item: item.url,
+          })),
         };
 
       default:
@@ -96,7 +97,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
       id={`structured-data-${type}`}
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(getStructuredData(), null, 2)
+        __html: JSON.stringify(getStructuredData(), null, 2),
       }}
     />
   );

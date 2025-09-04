@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth';
-import { useRouter, usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, User, Mail, Lock, UserPlus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, User, Mail, Lock, UserPlus } from "lucide-react";
 
 interface LoginModalProps {
   autoOpen?: boolean;
@@ -21,19 +27,19 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(autoOpen);
-  const [activeTab, setActiveTab] = useState('login');
+  const [activeTab, setActiveTab] = useState("login");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    password: ''
+    name: "",
+    email: "",
+    password: "",
   });
 
   // Auto-open the modal if autoOpen prop is true
@@ -48,7 +54,7 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
     if (autoOpen && !user) {
       // If modal is auto-opened and user is not authenticated, closing should redirect home
       if (!open) {
-        router.push('/');
+        router.push("/");
         return;
       }
     }
@@ -58,13 +64,13 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await login(loginData.email, loginData.password);
       setIsOpen(false);
     } catch (error: any) {
-      setError(error.message || 'Login failed');
+      setError(error.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -73,13 +79,13 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await signup(signupData.email, signupData.password, signupData.name);
       setIsOpen(false);
     } catch (error: any) {
-      setError(error.message || 'Signup failed');
+      setError(error.message || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -87,13 +93,13 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
 
   const handleAnonymousLogin = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await createAnonymousSession();
       setIsOpen(false);
     } catch (error: any) {
-      setError(error.message || 'Anonymous login failed');
+      setError(error.message || "Anonymous login failed");
     } finally {
       setLoading(false);
     }
@@ -103,145 +109,194 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button 
-            size="lg" 
-            className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-primary/20"
+          <Button
+            size="lg"
+            className="group from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground border-primary/20 relative overflow-hidden rounded-full border-2 bg-gradient-to-r px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
           >
             <span className="relative z-10 flex items-center">
-              <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              <User className="mr-2 h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
               Get Started
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="from-primary/20 absolute inset-0 bg-gradient-to-r to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10 backdrop-blur-md">
+      <DialogContent className="bg-card border-primary/20 shadow-primary/10 border-2 shadow-2xl backdrop-blur-md sm:max-w-md">
         <DialogHeader className="space-y-4">
-          <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <DialogTitle className="from-primary to-primary/70 bg-gradient-to-r bg-clip-text text-center text-2xl font-bold text-transparent">
             Welcome to Regret Archive
           </DialogTitle>
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+          <div className="via-primary/30 h-px w-full bg-gradient-to-r from-transparent to-transparent"></div>
         </DialogHeader>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg border border-border/50">
-            <TabsTrigger 
-              value="login" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+          <TabsList className="bg-muted/50 border-border/50 grid w-full grid-cols-3 rounded-lg border p-1">
+            <TabsTrigger
+              value="login"
+              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Login
             </TabsTrigger>
-            <TabsTrigger 
-              value="signup" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+            <TabsTrigger
+              value="signup"
+              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Sign Up
             </TabsTrigger>
-            <TabsTrigger 
-              value="anonymous" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=active]:font-semibold data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-300 hover:bg-muted/80"
+            <TabsTrigger
+              value="anonymous"
+              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Anonymous
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="login" className="space-y-6 mt-5">
+          <TabsContent value="login" className="mt-5 space-y-6">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</Label>
+                <Label
+                  htmlFor="login-email"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Email
+                </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="login-email"
                     type="email"
                     placeholder="Enter your email"
                     value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                    className="pl-10 bg-background border-2 border-border focus:border-primary transition-colors duration-200"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, email: e.target.value })
+                    }
+                    className="bg-background border-border focus:border-primary border-2 pl-10 transition-colors duration-200"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="login-password" className="text-sm font-medium text-foreground">Password</Label>
+                <Label
+                  htmlFor="login-password"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Password
+                </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="login-password"
                     type="password"
                     placeholder="Enter your password"
                     value={loginData.password}
-                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    className="pl-10 bg-background border-2 border-border focus:border-primary transition-colors duration-200"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
+                    className="bg-background border-border focus:border-primary border-2 pl-10 transition-colors duration-200"
                     required
                   />
                 </div>
               </div>
               {error && (
-                <Alert variant="destructive" className="border-2 border-destructive/50 bg-destructive/10">
+                <Alert
+                  variant="destructive"
+                  className="border-destructive/50 bg-destructive/10 border-2"
+                >
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-200" disabled={loading}>
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full py-3 font-semibold shadow-lg transition-all duration-200 hover:shadow-xl"
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Login
               </Button>
             </form>
           </TabsContent>
 
-          <TabsContent value="signup" className="space-y-6 mt-5">
+          <TabsContent value="signup" className="mt-5 space-y-6">
             <form onSubmit={handleSignup} className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="signup-name" className="text-sm font-medium text-foreground">Name</Label>
+                <Label
+                  htmlFor="signup-name"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Name
+                </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="signup-name"
                     type="text"
                     placeholder="Enter your name"
                     value={signupData.name}
-                    onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                    className="pl-10 bg-background border-2 border-border focus:border-primary transition-colors duration-200"
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, name: e.target.value })
+                    }
+                    className="bg-background border-border focus:border-primary border-2 pl-10 transition-colors duration-200"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="signup-email" className="text-sm font-medium text-foreground">Email</Label>
+                <Label
+                  htmlFor="signup-email"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Email
+                </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="signup-email"
                     type="email"
                     placeholder="Enter your email"
                     value={signupData.email}
-                    onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                    className="pl-10 bg-background border-2 border-border focus:border-primary transition-colors duration-200"
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, email: e.target.value })
+                    }
+                    className="bg-background border-border focus:border-primary border-2 pl-10 transition-colors duration-200"
                     required
                   />
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="signup-password" className="text-sm font-medium text-foreground">Password</Label>
+                <Label
+                  htmlFor="signup-password"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Password
+                </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                   <Input
                     id="signup-password"
                     type="password"
                     placeholder="Create a password"
                     value={signupData.password}
-                    onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                    className="pl-10 bg-background border-2 border-border focus:border-primary transition-colors duration-200"
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, password: e.target.value })
+                    }
+                    className="bg-background border-border focus:border-primary border-2 pl-10 transition-colors duration-200"
                     required
                   />
                 </div>
               </div>
               {error && (
-                <Alert variant="destructive" className="border-2 border-destructive/50 bg-destructive/10">
+                <Alert
+                  variant="destructive"
+                  className="border-destructive/50 bg-destructive/10 border-2"
+                >
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-200" disabled={loading}>
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full py-3 font-semibold shadow-lg transition-all duration-200 hover:shadow-xl"
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <UserPlus className="mr-2 h-4 w-4" />
                 Sign Up
@@ -249,25 +304,31 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
             </form>
           </TabsContent>
 
-          <TabsContent value="anonymous" className="space-y-6 mt-5">
-            <div className="text-center space-y-6">
+          <TabsContent value="anonymous" className="mt-5 space-y-6">
+            <div className="space-y-6 text-center">
               <div className="space-y-3">
-                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                  <User className="h-8 w-8 text-primary" />
+                <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+                  <User className="text-primary h-8 w-8" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Continue Anonymously</h3>
+                <h3 className="text-foreground text-lg font-semibold">
+                  Continue Anonymously
+                </h3>
                 <p className="text-muted-foreground text-sm">
-                  Browse and share regrets without creating an account. Your privacy is protected.
+                  Browse and share regrets without creating an account. Your
+                  privacy is protected.
                 </p>
               </div>
               {error && (
-                <Alert variant="destructive" className="border-2 border-destructive/50 bg-destructive/10">
+                <Alert
+                  variant="destructive"
+                  className="border-destructive/50 bg-destructive/10 border-2"
+                >
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <Button 
-                onClick={handleAnonymousLogin} 
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-200" 
+              <Button
+                onClick={handleAnonymousLogin}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground w-full py-3 font-semibold shadow-lg transition-all duration-200 hover:shadow-xl"
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -276,11 +337,11 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
             </div>
           </TabsContent>
         </Tabs>
-        
+
         {/* Small hint for users who want to go back */}
         {autoOpen && (
-          <div className="text-center pt-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground">
+          <div className="border-border/50 border-t pt-4 text-center">
+            <p className="text-muted-foreground text-xs">
               Close this modal to return to the home page
             </p>
           </div>

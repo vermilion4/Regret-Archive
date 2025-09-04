@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 interface SEOConfig {
   title: string;
@@ -6,7 +6,7 @@ interface SEOConfig {
   keywords?: string[];
   image?: string;
   url?: string;
-  type?: 'website' | 'article';
+  type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
@@ -14,8 +14,8 @@ interface SEOConfig {
   tags?: string[];
 }
 
-const baseUrl = 'https://regret-archive.appwrite.network';
-const defaultImage = '/og-image.png';
+const baseUrl = "https://regret-archive.appwrite.network";
+const defaultImage = "/og-image.png";
 
 export function generateMetadata(config: SEOConfig): Metadata {
   const {
@@ -24,36 +24,38 @@ export function generateMetadata(config: SEOConfig): Metadata {
     keywords = [],
     image = defaultImage,
     url,
-    type = 'website',
+    type = "website",
     publishedTime,
     modifiedTime,
-    author = 'Anonymous',
+    author = "Anonymous",
     section,
-    tags = []
+    tags = [],
   } = config;
 
-  const fullTitle = title.includes('Regret Archive') ? title : `${title} | Regret Archive`;
+  const fullTitle = title.includes("Regret Archive")
+    ? title
+    : `${title} | Regret Archive`;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
-  const fullImage = image.startsWith('http') ? image : `${baseUrl}${image}`;
+  const fullImage = image.startsWith("http") ? image : `${baseUrl}${image}`;
 
   return {
     title: fullTitle,
     description,
     keywords: [
-      'regret archive',
-      'regrets',
-      'life lessons',
-      'anonymous sharing',
-      'personal growth',
-      'community support',
-      ...keywords
+      "regret archive",
+      "regrets",
+      "life lessons",
+      "anonymous sharing",
+      "personal growth",
+      "community support",
+      ...keywords,
     ],
     authors: [{ name: author }],
     openGraph: {
       title: fullTitle,
       description,
       url: fullUrl,
-      siteName: 'Regret Archive',
+      siteName: "Regret Archive",
       images: [
         {
           url: fullImage,
@@ -62,7 +64,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
           alt: title,
         },
       ],
-      locale: 'en_US',
+      locale: "en_US",
       type,
       ...(publishedTime && { publishedTime }),
       ...(modifiedTime && { modifiedTime }),
@@ -70,11 +72,11 @@ export function generateMetadata(config: SEOConfig): Metadata {
       ...(tags.length > 0 && { tags }),
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: fullTitle,
       description,
       images: [fullImage],
-      creator: '@regretarchive',
+      creator: "@regretarchive",
     },
     alternates: {
       canonical: fullUrl,
@@ -82,61 +84,64 @@ export function generateMetadata(config: SEOConfig): Metadata {
   };
 }
 
-export function generateStructuredData(type: 'article' | 'breadcrumb' | 'faq', data: any) {
+export function generateStructuredData(
+  type: "article" | "breadcrumb" | "faq",
+  data: any
+) {
   const baseStructuredData = {
     "@context": "https://schema.org",
   };
 
   switch (type) {
-    case 'article':
+    case "article":
       return {
         ...baseStructuredData,
         "@type": "Article",
-        "headline": data.title,
-        "description": data.description,
-        "datePublished": data.publishedTime,
-        "dateModified": data.modifiedTime || data.publishedTime,
-        "author": {
+        headline: data.title,
+        description: data.description,
+        datePublished: data.publishedTime,
+        dateModified: data.modifiedTime || data.publishedTime,
+        author: {
           "@type": "Person",
-          "name": data.author || "Anonymous"
+          name: data.author || "Anonymous",
         },
-        "publisher": {
+        publisher: {
           "@type": "Organization",
-          "name": "Regret Archive",
-          "url": baseUrl
+          name: "Regret Archive",
+          url: baseUrl,
         },
-        "mainEntityOfPage": {
+        mainEntityOfPage: {
           "@type": "WebPage",
-          "@id": data.url
+          "@id": data.url,
         },
-        ...(data.section && { "articleSection": data.section }),
-        ...(data.keywords && { "keywords": data.keywords.join(', ') }),
+        ...(data.section && { articleSection: data.section }),
+        ...(data.keywords && { keywords: data.keywords.join(", ") }),
       };
 
-    case 'breadcrumb':
+    case "breadcrumb":
       return {
         ...baseStructuredData,
         "@type": "BreadcrumbList",
-        "itemListElement": data.items.map((item: any, index: number) => ({
+        itemListElement: data.items.map((item: any, index: number) => ({
           "@type": "ListItem",
-          "position": index + 1,
-          "name": item.name,
-          "item": item.url
-        }))
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
       };
 
-    case 'faq':
+    case "faq":
       return {
         ...baseStructuredData,
         "@type": "FAQPage",
-        "mainEntity": data.questions.map((q: any) => ({
+        mainEntity: data.questions.map((q: any) => ({
           "@type": "Question",
-          "name": q.question,
-          "acceptedAnswer": {
+          name: q.question,
+          acceptedAnswer: {
             "@type": "Answer",
-            "text": q.answer
-          }
-        }))
+            text: q.answer,
+          },
+        })),
       };
 
     default:
@@ -146,20 +151,21 @@ export function generateStructuredData(type: 'article' | 'breadcrumb' | 'faq', d
 
 export const seoConstants = {
   baseUrl,
-  siteName: 'Regret Archive',
-  defaultDescription: 'A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.',
+  siteName: "Regret Archive",
+  defaultDescription:
+    "A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences.",
   defaultKeywords: [
-    'regrets',
-    'life lessons',
-    'anonymous sharing',
-    'community support',
-    'personal growth',
-    'life experiences',
-    'emotional support',
-    'wisdom sharing'
+    "regrets",
+    "life lessons",
+    "anonymous sharing",
+    "community support",
+    "personal growth",
+    "life experiences",
+    "emotional support",
+    "wisdom sharing",
   ],
   social: {
-    twitter: '@regretarchive',
-    facebook: 'regretarchive',
-  }
+    twitter: "@regretarchive",
+    facebook: "regretarchive",
+  },
 } as const;

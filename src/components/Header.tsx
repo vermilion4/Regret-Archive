@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Plus, Search, LogOut, Menu, X } from 'lucide-react';
-import { useAuth } from '@/lib/auth';
-import { LoginModal } from './LoginModal';
-import Image from 'next/image';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Plus, Search, LogOut, Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { LoginModal } from "./LoginModal";
+import Image from "next/image";
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -15,11 +15,11 @@ export function Header() {
   const pathname = usePathname();
 
   const isActiveLink = (href: string) => {
-    if (href === '/') {
-      return pathname === '/';
+    if (href === "/") {
+      return pathname === "/";
     }
-    if (href === '/#stories') {
-      return pathname === '/' || pathname === '/#stories';
+    if (href === "/#stories") {
+      return pathname === "/" || pathname === "/#stories";
     }
     return pathname === href;
   };
@@ -27,11 +27,11 @@ export function Header() {
   const getLinkClasses = (href: string, isMobile = false) => {
     const baseClasses = "text-sm font-medium transition-colors";
     const mobilePadding = isMobile ? "py-2" : "";
-    
+
     if (isActiveLink(href)) {
       return `${baseClasses} text-primary font-semibold ${mobilePadding}`;
     }
-    
+
     return `${baseClasses} text-muted-foreground hover:text-primary ${mobilePadding}`;
   };
 
@@ -40,7 +40,7 @@ export function Header() {
       await logout();
       setIsMobileMenuOpen(false);
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -49,16 +49,25 @@ export function Header() {
   };
 
   return (
-    <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-border bg-card/50 sticky top-0 z-50 border-b backdrop-blur-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <Image src="/logo.png" alt="Regret Archive" width={130} height={130} />
+          <Link
+            href="/"
+            className="flex items-center space-x-2"
+            onClick={closeMobileMenu}
+          >
+            <Image
+              src="/logo.png"
+              alt="Regret Archive"
+              width={130}
+              height={130}
+            />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
+          <nav className="hidden items-center space-x-6 lg:flex">
             <Link href="/#stories" className={getLinkClasses("/#stories")}>
               Browse
             </Link>
@@ -71,7 +80,7 @@ export function Header() {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden items-center space-x-3 lg:flex">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/search">
                 <Search className="h-4 w-4" />
@@ -83,11 +92,11 @@ export function Header() {
                 <span className="ml-2">Share Regret</span>
               </Link>
             </Button>
-            
+
             {user ? (
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">
-                  {user.name || 'Anonymous User'}
+                <span className="text-muted-foreground text-sm">
+                  {user.name || "Anonymous User"}
                 </span>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
@@ -100,7 +109,7 @@ export function Header() {
           </div>
 
           {/* Mobile Actions */}
-          <div className="flex lg:hidden items-center space-x-2">
+          <div className="flex items-center space-x-2 lg:hidden">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/search">
                 <Search className="h-4 w-4" />
@@ -111,7 +120,7 @@ export function Header() {
                 <Plus className="h-4 w-4" />
               </Link>
             </Button>
-            
+
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
@@ -130,42 +139,47 @@ export function Header() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-border">
+          <div className="border-border mt-4 border-t pb-4 lg:hidden">
             <nav className="flex flex-col space-y-3 pt-4">
-              <Link 
-                href="/#stories" 
+              <Link
+                href="/#stories"
                 className={getLinkClasses("/#stories", true)}
                 onClick={closeMobileMenu}
               >
                 Browse
               </Link>
-              <Link 
-                href="/categories" 
+              <Link
+                href="/categories"
                 className={getLinkClasses("/categories", true)}
                 onClick={closeMobileMenu}
               >
                 Categories
               </Link>
-              <Link 
-                href="/insights" 
+              <Link
+                href="/insights"
                 className={getLinkClasses("/insights", true)}
                 onClick={closeMobileMenu}
               >
                 Insights
               </Link>
             </nav>
-            
+
             {/* Mobile User Actions */}
-            <div className="pt-4 border-t border-border mt-3">
+            <div className="border-border mt-3 border-t pt-4">
               {user ? (
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">
-                      {user.name || 'Anonymous User'}
+                    <span className="text-muted-foreground text-sm">
+                      {user.name || "Anonymous User"}
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={handleLogout} className="w-full">
-                    <LogOut className="h-4 w-4 mr-2" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="w-full"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </Button>
                 </div>

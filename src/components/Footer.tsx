@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Heart, Shield, Users, Lightbulb } from 'lucide-react';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -7,7 +8,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold font-bungee">Regret Archive</h3>
+          <Image src="/logo.png" alt="Regret Archive" width={200} height={200} />
             <p className="text-sm text-muted-foreground">
               A safe, anonymous platform for sharing regrets and life lessons. 
               Connect with others who understand your experiences.

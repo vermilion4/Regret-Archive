@@ -4,7 +4,7 @@ import { Regret } from '@/lib/types';
 import RegretDetailClient from './RegretDetailClient';
 
 // Generate metadata for each regret page
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const paramsData = await params;
   const { id } = paramsData;
   
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function RegretDetailPage({ params }: { params: { id: string } }) {
+export default async function RegretDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const paramsData = await params;
   const { id } = paramsData;
   return <RegretDetailClient regretId={id} />;

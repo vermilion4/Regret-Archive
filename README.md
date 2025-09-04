@@ -2,6 +2,9 @@
 
 A safe, anonymous platform for sharing regrets and life lessons. Connect with others who understand your experiences and turn regrets into collective wisdom.
 
+<img width="1902" height="866" alt="Screenshot 2025-09-04 193817" src="https://github.com/user-attachments/assets/965b0306-020a-4dbf-b8c4-1ba244771e75" />
+
+
 ## 🌟 Features
 
 ### Core Features
@@ -92,18 +95,6 @@ A safe, anonymous platform for sharing regrets and life lessons. Connect with ot
      "anonymous_id": "string",
      "comment_type": "string",
      "reactions": "object",
-     "created_at": "string"
-   }
-   ```
-
-   **Collection: `reactions`**
-
-   ```json
-   {
-     "target_id": "string",
-     "target_type": "string",
-     "reaction_type": "string",
-     "anonymous_id": "string",
      "created_at": "string"
    }
    ```

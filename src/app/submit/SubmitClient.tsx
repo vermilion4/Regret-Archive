@@ -124,9 +124,6 @@ export default function SubmitClient() {
               <Badge variant="secondary" className="bg-primary/20 text-primary">
                 Step-by-Step
               </Badge>
-              <span className="text-muted-foreground text-sm">
-                Take your time. This is a safe space.
-              </span>
             </div>
           </CardHeader>
           <CardContent>

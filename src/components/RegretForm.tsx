@@ -161,21 +161,21 @@ export function RegretForm({
   };
 
   const renderStepIndicator = () => (
-    <div className="mb-8 flex items-center justify-center">
+    <div className="mb-6 flex items-center justify-center px-4 sm:mb-8">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-all duration-300 ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 sm:h-10 sm:w-10 sm:text-sm ${
               step <= currentStep
                 ? "bg-primary text-primary-foreground shadow-lg"
                 : "bg-muted text-muted-foreground"
-            } ${step === currentStep ? "ring-primary/20 scale-110 ring-4" : ""}`}
+            } ${step === currentStep ? "ring-primary/20 scale-110 ring-2 sm:ring-4" : ""}`}
           >
-            {step < currentStep ? <Check className="h-5 w-5" /> : step}
+            {step < currentStep ? <Check className="h-3 w-3 sm:h-5 sm:w-5" /> : step}
           </div>
           {step < 4 && (
             <div
-              className={`mx-3 h-1 w-20 rounded-full transition-all duration-300 ${
+              className={`mx-2 h-1 w-8 rounded-full transition-all duration-300 sm:mx-3 sm:w-20 ${
                 step < currentStep ? "bg-primary" : "bg-muted"
               }`}
             />
@@ -509,19 +509,20 @@ export function RegretForm({
 
       {renderCurrentStep()}
 
-      <div className="border-border flex items-center justify-between border-t pt-8">
+      <div className="border-border flex flex-col items-center justify-between gap-4 border-t pt-6 sm:flex-row sm:pt-8">
         <Button
           type="button"
           variant="outline"
           size="lg"
           onClick={prevStep}
           disabled={currentStep === 1}
+          className="w-full sm:w-auto"
         >
-          <ArrowLeft className="mr-2 h-5 w-5" />
-          Previous
+          <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">Previous</span>
         </Button>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex w-full items-center justify-center space-x-3 sm:w-auto">
           {currentStep < 4 ? (
             <Button
               type="button"
@@ -535,9 +536,10 @@ export function RegretForm({
                     !form.watch("story") ||
                     !form.watch("lesson")))
               }
+              className="w-full sm:w-auto"
             >
-              Next
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <span className="text-sm sm:text-base">Next</span>
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           ) : (
             <Button
@@ -551,16 +553,17 @@ export function RegretForm({
                   form.handleSubmit(onSubmit)();
                 }
               }}
+              className="w-full sm:w-auto"
             >
               {isSubmitting ? (
                 <div className="flex items-center">
-                  <div className="mr-2 h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
-                  Submitting...
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white sm:h-5 sm:w-5"></div>
+                  <span className="text-sm sm:text-base">Submitting...</span>
                 </div>
               ) : (
                 <div className="flex items-center">
-                  <span>Share My Regret</span>
-                  <span className="ml-2 text-sm opacity-80">→</span>
+                  <span className="text-sm sm:text-base">Share My Regret</span>
+                  <span className="ml-2 text-xs opacity-80 sm:text-sm">→</span>
                 </div>
               )}
             </Button>

@@ -111,7 +111,7 @@ export default function RegretDetailPage() {
             </div>
 
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 font-serif">
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 {regret.title}
               </h1>
               

@@ -83,11 +83,8 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
         }
       );
       
-      console.log('Successfully updated comment count for regret:', regretId);
     } catch (error) {
       console.error('Error updating regret comment count:', error);
-      // Don't throw error here as the comment was already created successfully
-      // The comment count will be updated when the parent component refreshes
     }
   };
 

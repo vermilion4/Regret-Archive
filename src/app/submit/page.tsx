@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation';
 import { RegretForm } from '@/components/RegretForm';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Shield, Users, Lightbulb } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Heart, Shield, Users, Lightbulb, Info } from 'lucide-react';
 
 export default function SubmitPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
 
   const handleSubmitSuccess = () => {
     router.push('/');
@@ -26,6 +29,53 @@ export default function SubmitPage() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Your story matters. Share your regret anonymously and help others learn from your experience.
           </p>
+          
+          {/* Guidelines Button */}
+          <div className="mt-4">
+            <Dialog open={isGuidelinesOpen} onOpenChange={setIsGuidelinesOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Info className="h-4 w-4" />
+                  Community Guidelines
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-xl">Community Guidelines</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-green-600">✅ Do</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• Share personal experiences and lessons learned</li>
+                        <li>• Be honest and vulnerable</li>
+                        <li>• Focus on the lesson, not just the pain</li>
+                        <li>• Respect others' experiences</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-red-600">❌ Don't</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>• Share identifying information about others</li>
+                        <li>• Promote harmful or illegal activities</li>
+                        <li>• Use this as a platform for hate speech</li>
+                        <li>• Spam or post irrelevant content</li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Remember:</strong> This is a space for healing and growth. 
+                      Your story has the power to help someone else feel less alone.
+                    </p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Benefits */}
@@ -73,43 +123,6 @@ export default function SubmitPage() {
               isSubmitting={isSubmitting}
               setIsSubmitting={setIsSubmitting}
             />
-          </CardContent>
-        </Card>
-
-        {/* Guidelines */}
-        <Card className="mt-8">
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Community Guidelines</h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-green-600">✅ Do</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Share personal experiences and lessons learned</li>
-                  <li>• Be honest and vulnerable</li>
-                  <li>• Focus on the lesson, not just the pain</li>
-                  <li>• Respect others' experiences</li>
-                </ul>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium text-red-600">❌ Don't</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Share identifying information about others</li>
-                  <li>• Promote harmful or illegal activities</li>
-                  <li>• Use this as a platform for hate speech</li>
-                  <li>• Spam or post irrelevant content</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <strong>Remember:</strong> This is a space for healing and growth. 
-                Your story has the power to help someone else feel less alone.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

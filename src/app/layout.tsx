@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Fredoka } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -7,7 +7,11 @@ import { AuthProvider } from '@/lib/auth'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { bungee } from './fonts'
 
-const inter = Inter({ subsets: ['latin'] })
+const fredoka = Fredoka({ 
+  subsets: ['latin'], 
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-fredoka'
+})
 
 export const metadata: Metadata = {
   title: 'Regret Archive - Share Your Regrets Anonymously',
@@ -28,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} ${bungee.variable} min-h-screen bg-background text-foreground checker-background`}>
+      <body className={`${fredoka.variable} ${bungee.variable} min-h-screen bg-background text-foreground checker-background`}>
         <AuthProvider>
           <ProtectedRoute>
             <div className="flex min-h-screen flex-col">

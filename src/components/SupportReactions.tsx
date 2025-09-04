@@ -57,7 +57,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
         >
           <Users className="h-5 w-5 text-blue-500" />
           <span>Me Too</span>
-          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+          <span className="bg-blue-100 text-blue-800 w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium">
             {Number(reactions.me_too || 0)}
           </span>
         </Button>
@@ -71,7 +71,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
         >
           <Heart className="h-5 w-5 text-red-500" />
           <span>Hugs</span>
-          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium">
+          <span className="bg-red-100 text-red-800 w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium">
             {Number(reactions.hugs || 0)}
           </span>
         </Button>
@@ -85,7 +85,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
         >
           <Lightbulb className="h-5 w-5 text-yellow-500" />
           <span>Wisdom</span>
-          <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium">
+          <span className="bg-yellow-100 text-yellow-800 w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium">
             {Number(reactions.wisdom || 0)}
           </span>
         </Button>

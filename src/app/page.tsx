@@ -15,6 +15,7 @@ import { useAuth } from '@/lib/auth';
 import { LoginModal } from '@/components/LoginModal';
 import { cn, safeJsonParse } from '@/lib/utils';
 import { RegretOfTheDay } from '@/components/RegretOfTheDay';
+import Link from 'next/link';
 
 export default function HomePage() {
   const { user, loading: authLoading } = useAuth();
@@ -174,7 +175,7 @@ export default function HomePage() {
                   <div className="text-center">
                     <Button 
                       size="lg" 
-                      className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full mb-2"
+                      className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full"
                       onClick={() => {
                         // This will be handled by the LoginModal component
                       }}
@@ -185,7 +186,6 @@ export default function HomePage() {
                       </span>
                       <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Button>
-                    <p className="text-sm text-muted-foreground">Sign in to share your regrets</p>
                   </div>
                 )}
                 <LoginModal />
@@ -256,7 +256,7 @@ export default function HomePage() {
             {/* Sample Regret Preview */}
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">Featured Story</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2 font-bungee">Featured Story</h2>
                 <p className="text-muted-foreground">See what others are sharing</p>
               </div>
               
@@ -293,17 +293,17 @@ export default function HomePage() {
         {/* Call to Action Section */}
         <div className="bg-muted/30 py-16">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Share Your Story?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-bungee">Ready to Share Your Story?</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join our community and help others learn from your experiences. 
               Your story could be the one that changes someone's life.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full">
-                Get Started Now
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full" asChild>
+                <Link href="/submit">Get Started Now</Link>
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-3 rounded-full border-2">
-                Learn More
+              <Button variant="outline" size="lg" className="px-8 py-3 rounded-full border-2" asChild>
+                <Link href="/categories">Learn More</Link>
               </Button>
             </div>
           </div>
@@ -375,7 +375,6 @@ export default function HomePage() {
                   {(() => {
                     const totalReactions = regrets.reduce((acc, regret) => {
                       const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
-                      console.log(reactions)
                       return acc + Number(reactions.hugs || 0) + Number(reactions.me_too || 0) + Number(reactions.wisdom || 0);
                     }, 0);
                     return totalReactions;
@@ -400,9 +399,9 @@ export default function HomePage() {
       </div>
 
       {/* Filters and Content - Improved Spacing */}
-      <div id="stories" className="container mx-auto px-4">
+      <div className="container mx-auto px-4">
         {/* Filters with Better Spacing */}
-        <div className="mb-12 space-y-8">
+        <div id="stories" className="mb-12 space-y-8">
           <CategoryFilter 
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}

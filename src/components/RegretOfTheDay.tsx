@@ -108,7 +108,7 @@ export function RegretOfTheDay({ featuredRegret }: RegretOfTheDayProps) {
                 </Link>
               </Button>
               {featuredRegret.sliding_doors && (
-                <Button variant="outline" className="flex-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30 hover:bg-purple-500/20 text-purple-500" asChild>
+                <Button variant="outline" className="flex-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 hover:bg-primary/20 text-primary" asChild>
                   <Link href={`/regret/${featuredRegret.$id}#sliding-doors`}>
                     🚪 Sliding Doors
                   </Link>

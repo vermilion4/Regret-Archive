@@ -140,9 +140,6 @@ export default function CategoriesPage() {
                         <span className="text-3xl">{category.icon}</span>
                         <div>
                           <h3 className="text-xl font-semibold">{category.name}</h3>
-                          <Badge variant="secondary" className={`category-${category.id}`}>
-                            {category.id}
-                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -175,7 +172,7 @@ export default function CategoriesPage() {
                     </div>
                     
                     <Button className="w-full" asChild>
-                      <Link href={`/?category=${category.id}`}>
+                      <Link href={`/?category=${category.id}#stories`}>
                         Browse {category.name}
                       </Link>
                     </Button>
@@ -190,7 +187,7 @@ export default function CategoriesPage() {
         <div className="mt-16 text-center">
           <Card className="max-w-2xl mx-auto bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-4">Ready to Share Your Story?</h2>
+              <h2 className="text-2xl font-bold mb-4 font-bungee">Ready to Share Your Story?</h2>
               <p className="text-muted-foreground mb-6">
                 Your experience could help someone else avoid the same regret. Share anonymously and make a difference.
               </p>

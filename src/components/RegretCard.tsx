@@ -25,7 +25,7 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
       <Card className={`regret-card h-full flex flex-col ${isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
         <CardHeader className="pb-3 flex-shrink-0">
           <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 capitalize">
               <Badge variant="secondary" className={`category-${regret.category}`}>
               <span className="text-lg">{getCategoryIcon(regret.category)}</span>
                 {regret.category}

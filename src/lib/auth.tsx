@@ -37,7 +37,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      await account.createEmailSession(email, password);
+      await account.createEmailPasswordSession({
+        email,
+        password
+      });
       await checkUser();
     } catch (error) {
       throw error;
@@ -46,7 +49,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (email: string, password: string, name: string) => {
     try {
-      await account.create(ID.unique(), email, password, name);
+      // Create anonymous session first to get proper permissions
+      // await account.createAnonymousSession();
+      await account.create({
+        userId: ID.unique(),
+        email,
+        password,
+        name
+      });
+      // Delete the anonymous session before logging in
+      // await account.deleteSession('current');
       await login(email, password);
     } catch (error) {
       throw error;

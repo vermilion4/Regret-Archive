@@ -18,7 +18,7 @@ export function Footer() {
             <h4 className="font-medium">Platform</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/#stories" className="text-muted-foreground hover:text-foreground transition-colors">
                   Browse Regrets
                 </Link>
               </li>
@@ -71,7 +71,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Regret Archive. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Regret Archive. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -39,6 +39,32 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
   const [selectedCategory, setSelectedCategory] = useState<RegretCategory | null>(null);
   const [includeSlidingDoors, setIncludeSlidingDoors] = useState(false);
 
+  const handleSlidingDoorsToggle = (include: boolean) => {
+    setIncludeSlidingDoors(include);
+    if (!include) {
+      // Clear the sliding_doors field when toggling off
+      form.setValue('sliding_doors', undefined);
+    }
+  };
+
+  const isFormValid = () => {
+    const values = form.getValues();
+    const errors = form.formState.errors;
+    
+    // Check required fields
+    if (!values.title || !values.story || !values.lesson || !values.category) {
+      return false;
+    }
+    
+    // Check sliding doors validation only if it's enabled
+    if (includeSlidingDoors && (!values.sliding_doors?.alternate_path || values.sliding_doors.alternate_path.length < 20)) {
+      return false;
+    }
+    
+    // Check for any validation errors
+    return Object.keys(errors).length === 0;
+  };
+
   const form = useForm<RegretFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,14 +78,9 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
     }
   });
 
-  const onSubmit = async (data: RegretFormData) => {
-    console.log('Form submitted with data:', data);
-    console.log('Form validation errors:', form.formState.errors);
-    
+  const onSubmit = async (data: RegretFormData) => {    
     try {
-      setIsSubmitting(true);
-      console.log('Setting isSubmitting to true');
-      
+      setIsSubmitting(true);      
              const regretData = {
          ...data,
          anonymous_id: getAnonymousId(),
@@ -73,9 +94,6 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
          is_featured: false
        };
 
-      console.log('Prepared regret data:', regretData);
-      console.log('Attempting to create document...');
-
       const result = await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
@@ -83,13 +101,11 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
         regretData
       );
 
-      console.log('Document created successfully:', result);
       onSuccess();
     } catch (error) {
       console.error('Error submitting regret:', error);
       alert(`There was an error submitting your regret: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      console.log('Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
@@ -273,7 +289,7 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
             type="checkbox"
             id="sliding-doors"
             checked={includeSlidingDoors}
-            onChange={(e) => setIncludeSlidingDoors(e.target.checked)}
+            onChange={(e) => handleSlidingDoorsToggle(e.target.checked)}
             className="rounded"
           />
           <label htmlFor="sliding-doors" className="text-sm font-medium">
@@ -307,7 +323,7 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
         </p>
         
         {/* Validation Summary */}
-        {!form.formState.isValid && (
+        {!form.formState.isValid && !isFormValid() && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <h4 className="text-red-800 font-medium mb-2 flex items-center">
               <span className="mr-2">⚠️</span>
@@ -419,15 +435,11 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
               type="button"
               variant="submit"
               size="xl"
-              disabled={isSubmitting || !form.formState.isValid}
+              disabled={isSubmitting || !isFormValid()}
               onClick={() => {
-                console.log('Share My Regret button clicked');
-                console.log('Form is valid:', form.formState.isValid);
-                console.log('Form errors:', form.formState.errors);
-                console.log('Form values:', form.getValues());
                 
                 // Only submit if form is valid
-                if (form.formState.isValid) {
+                if (isFormValid()) {
                   form.handleSubmit(onSubmit)();
                 }
               }}

@@ -101,7 +101,7 @@ export default function SearchPage() {
             </Link>
           </Button>
           
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Search Regrets</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-bungee">Search Regrets</h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
             Find regrets and life lessons by searching through titles, stories, and lessons learned.
           </p>
@@ -215,7 +215,7 @@ export default function SearchPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="outline" asChild>
-                <Link href="/">Browse All Regrets</Link>
+                <Link href="/#stories">Browse All Regrets</Link>
               </Button>
               <Button asChild>
                 <Link href="/submit">Share Your Story</Link>

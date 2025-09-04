@@ -199,3 +199,7 @@ body {
   color: oklch(from gray 30%);
   border: 1px solid color-mix(in oklch, oklch(from gray 80%) 30%, transparent);
 }
+
+.container {
+  max-width: 1700px;
+}

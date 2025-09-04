@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Heart, Plus, Search, Archive, LogOut, User, Menu, X } from 'lucide-react';
+import { Plus, Search, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { LoginModal } from './LoginModal';
 import Image from 'next/image';
@@ -54,11 +54,6 @@ export function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            {/* <Archive className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-lg sm:text-xl font-bold">Regret Archive</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Share. Learn. Grow.</p>
-            </div> */}
             <Image src="/logo.png" alt="Regret Archive" width={130} height={130} />
           </Link>
 

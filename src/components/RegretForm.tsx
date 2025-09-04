@@ -382,72 +382,71 @@ export function RegretForm({ onSuccess, isSubmitting, setIsSubmitting }: RegretF
   };
 
   return (
-    <form 
-      onSubmit={(e) => {
-        console.log('Form submit event triggered');
-        form.handleSubmit(onSubmit)(e);
-      }} 
-      className="space-y-6"
-    >
+    <div className="space-y-6">
       {renderStepIndicator()}
       
       {renderCurrentStep()}
       
-             <div className="flex items-center justify-between pt-8 border-t border-border">
-         <Button
-           type="button"
-           variant="outline"
-           size="lg"
-           onClick={prevStep}
-           disabled={currentStep === 1}
-         >
-           <ArrowLeft className="h-5 w-5 mr-2" />
-           Previous
-         </Button>
-         
-         <div className="flex items-center space-x-3">
-           {currentStep < 4 ? (
-             <Button
-               type="button"
-               variant="navigation"
-               size="lg"
-               onClick={nextStep}
-               disabled={
-                 (currentStep === 1 && !selectedCategory) ||
-                 (currentStep === 2 && (!form.watch('title') || !form.watch('story') || !form.watch('lesson')))
-               }
-             >
-               Next
-               <ArrowRight className="h-5 w-5 ml-2" />
-             </Button>
-           ) : (
-             <Button
-               type="submit"
-               variant="submit"
-               size="xl"
-               disabled={isSubmitting || !form.formState.isValid}
-               onClick={() => {
-                 console.log('Submit button clicked');
-                 console.log('Form is valid:', form.formState.isValid);
-                 console.log('Form errors:', form.formState.errors);
-                 console.log('Form values:', form.getValues());
-               }}
-             >
-               {isSubmitting ? (
-                 <div className="flex items-center">
-                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                   Submitting...
-                 </div>
-               ) : (
-                 <div className="flex items-center">
-                   <span>Share My Regret</span>
-                   <span className="ml-2 text-sm opacity-80">→</span>
-                 </div>
-               )}
-             </Button>
-           )}
-         </div>
-       </div>
-    </form>
+      <div className="flex items-center justify-between pt-8 border-t border-border">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          onClick={prevStep}
+          disabled={currentStep === 1}
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Previous
+        </Button>
+        
+        <div className="flex items-center space-x-3">
+          {currentStep < 4 ? (
+            <Button
+              type="button"
+              variant="navigation"
+              size="lg"
+              onClick={nextStep}
+              disabled={
+                (currentStep === 1 && !selectedCategory) ||
+                (currentStep === 2 && (!form.watch('title') || !form.watch('story') || !form.watch('lesson')))
+              }
+            >
+              Next
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="submit"
+              size="xl"
+              disabled={isSubmitting || !form.formState.isValid}
+              onClick={() => {
+                console.log('Share My Regret button clicked');
+                console.log('Form is valid:', form.formState.isValid);
+                console.log('Form errors:', form.formState.errors);
+                console.log('Form values:', form.getValues());
+                
+                // Only submit if form is valid
+                if (form.formState.isValid) {
+                  form.handleSubmit(onSubmit)();
+                }
+              }}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Submitting...
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <span>Share My Regret</span>
+                  <span className="ml-2 text-sm opacity-80">→</span>
+                </div>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

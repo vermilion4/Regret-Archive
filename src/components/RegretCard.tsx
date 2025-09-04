@@ -21,13 +21,13 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
   const reactions = safeJsonParse(regret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
 
   return (
-    <Link href={`/regret/${regret.$id}`}>
-      <Card className={`regret-card ${isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
-        <CardHeader className="pb-3">
+    <Link href={`/regret/${regret.$id}`} className="h-full block">
+      <Card className={`regret-card h-full flex flex-col ${isFeatured ? 'ring-2 ring-primary/20' : ''}`}>
+        <CardHeader className="pb-3 flex-shrink-0">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-lg">{getCategoryIcon(regret.category)}</span>
               <Badge variant="secondary" className={`category-${regret.category}`}>
+              <span className="text-lg">{getCategoryIcon(regret.category)}</span>
                 {regret.category}
               </Badge>
             </div>
@@ -42,8 +42,8 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
           </h3>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
+        <CardContent className="space-y-4 flex-1 flex flex-col">
+          <div className="space-y-2 flex-1">
             <p className="text-story line-clamp-3">
               {isDetailed ? regret.story : truncateText(regret.story, 200)}
             </p>
@@ -57,7 +57,7 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
             )}
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-auto">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <Heart className="h-4 w-4 text-red-500" />
@@ -81,7 +81,7 @@ export function RegretCard({ regret, variant = 'compact' }: RegretCardProps) {
           </div>
 
           {isDetailed && regret.age_when_happened && (
-            <div className="text-meta">
+            <div className="text-meta mt-2">
               <span>Age when happened: {regret.age_when_happened}</span>
               {regret.years_ago && <span> • {regret.years_ago} years ago</span>}
             </div>

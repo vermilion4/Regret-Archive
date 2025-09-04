@@ -20,7 +20,7 @@ export default function SubmitPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-bungee">
             Share Your Regret
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -29,7 +29,7 @@ export default function SubmitPage() {
         </div>
 
         {/* Benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="text-center p-6">
             <Shield className="h-8 w-8 text-primary mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Completely Anonymous</h3>
@@ -53,7 +53,7 @@ export default function SubmitPage() {
               Turn your regret into wisdom that helps others.
             </p>
           </Card>
-        </div>
+        </div> */}
 
         {/* Form */}
         <Card>

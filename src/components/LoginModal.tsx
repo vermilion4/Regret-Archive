@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,9 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, User, Mail, Lock, UserPlus } from 'lucide-react';
 
-export function LoginModal() {
-  const { login, signup, createAnonymousSession } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+interface LoginModalProps {
+  autoOpen?: boolean;
+  trigger?: React.ReactNode;
+}
+
+export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
+  const { user, login, signup, createAnonymousSession } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(autoOpen);
   const [activeTab, setActiveTab] = useState('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,6 +35,25 @@ export function LoginModal() {
     email: '',
     password: ''
   });
+
+  // Auto-open the modal if autoOpen prop is true
+  useEffect(() => {
+    if (autoOpen) {
+      setIsOpen(true);
+    }
+  }, [autoOpen]);
+
+  // Handle modal open/close with routing logic
+  const handleOpenChange = (open: boolean) => {
+    if (autoOpen && !user) {
+      // If modal is auto-opened and user is not authenticated, closing should redirect home
+      if (!open) {
+        router.push('/');
+        return;
+      }
+    }
+    setIsOpen(open);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,18 +100,20 @@ export function LoginModal() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button 
-          size="lg" 
-          className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-primary/20"
-        >
-          <span className="relative z-10 flex items-center">
-            <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
-            Get Started
-          </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </Button>
+        {trigger || (
+          <Button 
+            size="lg" 
+            className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-primary/20"
+          >
+            <span className="relative z-10 flex items-center">
+              <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+              Get Started
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10 backdrop-blur-md">
         <DialogHeader className="space-y-4">
@@ -247,6 +276,15 @@ export function LoginModal() {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Small hint for users who want to go back */}
+        {autoOpen && (
+          <div className="text-center pt-4 border-t border-border/50">
+            <p className="text-xs text-muted-foreground">
+              Close this modal to return to the home page
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

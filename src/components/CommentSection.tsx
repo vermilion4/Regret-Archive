@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,11 +39,7 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
     }
   });
 
-  useEffect(() => {
-    fetchComments();
-  }, [regretId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await databases.listDocuments(
@@ -60,7 +56,11 @@ export function CommentSection({ regretId, onCommentAdded }: CommentSectionProps
     } finally {
       setLoading(false);
     }
-  };
+  }, [regretId]);
+
+  useEffect(() => {
+    fetchComments();
+  }, []);
 
   const updateRegretCommentCount = async () => {
     try {

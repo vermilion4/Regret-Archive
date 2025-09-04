@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { RegretCard } from '@/components/RegretCard';
 import { CategoryFilter } from '@/components/CategoryFilter';
@@ -35,25 +35,9 @@ export default function HomePage() {
     }
   }, [searchParams, selectedCategory]);
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchRegrets();
-    }
-  }, [selectedCategory, sortBy, user, authLoading]);
-
-  // Scroll effect for hero and back to top
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setHeroInView(scrollY < 100);
-      setShowBackToTop(scrollY > 500);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const fetchRegrets = async () => {
+  const fetchRegrets = useCallback(async () => {
+    if (!user) return; // Don't fetch if no user
+    
     try {
       setLoading(true);
       
@@ -113,7 +97,25 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, sortBy, user]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchRegrets();
+    }
+  }, [authLoading, user, fetchRegrets]);
+
+  // Scroll effect for hero and back to top
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setHeroInView(scrollY < 100);
+      setShowBackToTop(scrollY > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const filteredRegrets = selectedCategory === 'all' 
     ? regrets 
@@ -143,7 +145,7 @@ export default function HomePage() {
             {/* Main Hero Content */}
             <div className="text-center mb-16">
               <div className="relative inline-block mb-6">
-                <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight font-bungee">
                   Regret Archive
                 </h1>
                 <div className="absolute -top-4 -right-4 opacity-60">
@@ -158,15 +160,34 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-                <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full" asChild>
-                  <a href="/submit">
-                    <span className="relative z-10 flex items-center">
-                      Share Your Regret
-                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </a>
-                </Button>
+                {user ? (
+                  <Button size="lg" className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full" asChild>
+                    <a href="/submit">
+                      <span className="relative z-10 flex items-center">
+                        Share Your Regret
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </Button>
+                ) : (
+                  <div className="text-center">
+                    <Button 
+                      size="lg" 
+                      className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full mb-2"
+                      onClick={() => {
+                        // This will be handled by the LoginModal component
+                      }}
+                    >
+                      <span className="relative z-10 flex items-center">
+                        Share Your Regret
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Button>
+                    <p className="text-sm text-muted-foreground">Sign in to share your regrets</p>
+                  </div>
+                )}
                 <LoginModal />
               </div>
 
@@ -293,7 +314,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Modern Hero Section */}
+      {/* Hero Section */}
       <div className={cn(
         "relative overflow-hidden transition-all duration-700 ease-out",
         heroInView ? "pb-16 md:pb-24" : "pb-8"
@@ -307,10 +328,10 @@ export default function HomePage() {
           {/* Main Title */}
           <div className={cn(
             "text-center mb-16 transition-all duration-700",
-            heroInView ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-90"
+            heroInView ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-80"
           )}>
             <div className="relative inline-block mb-6">
-              <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight">
+                             <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 bg-clip-text text-transparent leading-tight font-bungee">
                 Regret Archive
               </h1>
               <div className="absolute -top-4 -right-4 opacity-60">
@@ -318,7 +339,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
               A safe, anonymous space to share regrets and life lessons.<br />
               <span className="text-foreground/80 font-medium">Connect with others who understand your experiences.</span>
             </p>
@@ -417,21 +438,21 @@ export default function HomePage() {
 
         {/* Regrets Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <div className="p-6 space-y-4">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-8 bg-muted rounded w-3/4"></div>
                   <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                    <div className="h-8 bg-muted rounded"></div>
+                    <div className="h-8 bg-muted rounded w-5/6"></div>
                   </div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16 items-stretch">
             {filteredRegrets.map((regret) => (
               <RegretCard key={regret.$id} regret={regret} />
             ))}

@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Regret Archive</h3>
+            <h3 className="text-lg font-semibold font-bungee">Regret Archive</h3>
             <p className="text-sm text-muted-foreground">
               A safe, anonymous platform for sharing regrets and life lessons. 
               Connect with others who understand your experiences.
@@ -65,7 +65,7 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Heart className="h-4 w-4 text-red-500" />
-              <span>Made with care</span>
+              <span>Developed by Adaeze Ndupu</span>
             </div>
           </div>
         </div>

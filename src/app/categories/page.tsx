@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, TrendingUp, Clock } from 'lucide-react';
-import { CATEGORIES, RegretCategory } from '@/lib/types';
+import { CATEGORIES, RegretCategory, Regret } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
 import Link from 'next/link';
@@ -21,60 +21,60 @@ export default function CategoriesPage() {
   const [categoryStats, setCategoryStats] = useState<CategoryStats[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCategoryStats();
-  }, []);
-
   const fetchCategoryStats = async () => {
     try {
       setLoading(true);
-      const stats: CategoryStats[] = [];
+      
+      // OPTIMIZATION: Instead of making 21 API calls (3 per category), 
+      // we fetch all regrets once and calculate stats locally
+      const allRegretsResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTIONS.REGRETS,
+        [Query.limit(1000)] // Get up to 1000 regrets
+      );
 
-      for (const category of CATEGORIES) {
-        // Get total count
-        const totalResponse = await databases.listDocuments(
-          DATABASE_ID,
-          COLLECTIONS.REGRETS,
-          [Query.equal('category', category.id)]
-        );
+      const regrets = allRegretsResponse.documents as unknown as Regret[];
+      
+      // Calculate all category stats locally from the single dataset
+      const stats: CategoryStats[] = CATEGORIES.map(category => {
+        const categoryRegrets = regrets.filter(regret => regret.category === category.id);
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        
+        const totalCount = categoryRegrets.length;
+        const recentCount = categoryRegrets.filter(regret => 
+          new Date(regret.$createdAt) > weekAgo
+        ).length;
+        const popularCount = categoryRegrets.filter(regret => 
+          regret.comment_count > 5
+        ).length;
 
-        // Get recent count (last 7 days)
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const recentResponse = await databases.listDocuments(
-          DATABASE_ID,
-          COLLECTIONS.REGRETS,
-          [
-            Query.equal('category', category.id),
-            Query.greaterThan('$createdAt', weekAgo.toISOString())
-          ]
-        );
-
-        // Get popular count (high comment count)
-        const popularResponse = await databases.listDocuments(
-          DATABASE_ID,
-          COLLECTIONS.REGRETS,
-          [
-            Query.equal('category', category.id),
-            Query.greaterThan('comment_count', 5)
-          ]
-        );
-
-        stats.push({
+        return {
           id: category.id,
-          count: totalResponse.total,
-          recentCount: recentResponse.total,
-          popularCount: popularResponse.total
-        });
-      }
+          count: totalCount,
+          recentCount,
+          popularCount
+        };
+      });
 
       setCategoryStats(stats);
     } catch (error) {
       console.error('Error fetching category stats:', error);
+      // Set default stats if there's an error
+      setCategoryStats(CATEGORIES.map(category => ({
+        id: category.id,
+        count: 0,
+        recentCount: 0,
+        popularCount: 0
+      })));
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCategoryStats();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -88,10 +88,27 @@ export default function CategoriesPage() {
             </Link>
           </Button>
           
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Categories</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl">
-            Explore regrets by category. Each category represents different aspects of life where we often experience regret and growth.
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-bungee">Categories</h1>
+              <p className="text-xl text-muted-foreground max-w-3xl">
+                Explore regrets by category. Each category represents different aspects of life where we often experience regret and growth.
+              </p>
+            </div>
+            
+            {!loading && (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setLoading(true);
+                  fetchCategoryStats();
+                }}
+                disabled={loading}
+              >
+                Refresh Stats
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Categories Grid */}

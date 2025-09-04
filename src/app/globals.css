@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Georgia&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libertinus+Mono:ital,wght@0,400;0,700&display=swap');
 @import "tailwindcss";
 
 summary::-webkit-details-marker {
@@ -81,6 +83,7 @@ html {
   --line-height-loose: 1.75;
   --font-sans: system-ui, sans-serif;
   --font-serif: 'Georgia', serif;
+  --font-bungee: var(--font-bungee);
 }
 
 .dark {
@@ -167,15 +170,6 @@ body {
 .regret-card:hover {
   border-color: color-mix(in oklch, var(--color-primary) 50%, transparent);
   box-shadow: 0 10px 15px -3px color-mix(in oklch, var(--color-primary) 10%, transparent);
-}
-
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: var(--font-size-xs);
-  font-weight: 500;
 }
 
 /* Category colors */

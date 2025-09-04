@@ -44,7 +44,7 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
 
   return (
     <div className="w-full">
-      {/* Desktop - Enhanced Grid Layout */}
+      {/* Desktop - Subtle Grid Layout */}
       <div className="hidden sm:block">
         <Tabs 
           value={selectedCategory} 
@@ -52,58 +52,48 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
           className="w-full"
         >
           <TabsList className={cn(
-            "grid w-full h-auto bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 backdrop-blur-sm p-3 gap-3 rounded-2xl border border-border/50",
+            "grid w-full h-auto bg-background/50 backdrop-blur-sm p-2 gap-2 rounded-xl border border-border/30",
             "grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8",
-            "shadow-lg shadow-black/5"
+            "shadow-sm"
           )}>
             {allCategories.map((category) => (
               <TabsTrigger
                 key={category.id}
                 value={category.id}
                 className={cn(
-                  "flex flex-col items-center space-y-3 p-4 md:p-5",
-                  // Enhanced active state
-                  "data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/20 data-[state=active]:to-primary/10",
-                  "data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20",
-                  "data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:border-primary/30",
-                  // Improved hover effects
-                  "hover:bg-gradient-to-br hover:from-muted/40 hover:to-muted/20 hover:scale-102",
-                  "hover:shadow-md hover:shadow-black/10",
-                  // Better transitions
-                  "transition-all duration-300 ease-out",
-                  "rounded-xl group relative overflow-hidden",
-                  // Focus states
-                  "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-                  // Animated background
-                  "before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent",
-                  "before:opacity-0 data-[state=active]:before:opacity-100 before:transition-opacity before:duration-300"
+                  "flex flex-col items-center space-y-2 p-3",
+                  "data-[state=active]:bg-primary/8 data-[state=active]:text-primary",
+                  "data-[state=active]:border data-[state=active]:border-primary/20",
+                  "hover:bg-muted/40 hover:text-foreground/80 cursor-pointer",
+                  "transition-all duration-200 ease-out",
+                  "rounded-lg group relative",
+                  "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-1"
                 )}
                 title={category.description}
               >
-                {/* Icon with enhanced animations */}
+                {/* Icon with subtle animations */}
                 <span className={cn(
-                  "text-2xl md:text-3xl transition-all duration-300 relative z-10",
-                  "group-hover:scale-110 group-data-[state=active]:scale-110",
-                  "filter group-hover:brightness-110",
-                  // Add subtle rotation on hover
-                  "group-hover:rotate-3 group-data-[state=active]:rotate-3"
+                  "text-lg transition-all duration-200 relative z-10",
+                  "group-hover:scale-105 group-data-[state=active]:scale-105",
+                  "opacity-80 group-hover:opacity-100 group-data-[state=active]:opacity-100"
                 )}>
                   {category.icon}
                 </span>
                 
-                {/* Label with better typography */}
+                {/* Label with refined typography */}
                 <span className={cn(
-                  "text-xs md:text-sm font-medium text-center leading-tight relative z-10",
-                  "group-data-[state=active]:text-foreground group-data-[state=active]:font-semibold",
-                  "transition-all duration-300"
+                  "text-xs font-medium text-center leading-tight relative z-10",
+                  "text-muted-foreground group-hover:text-foreground/80",
+                  "group-data-[state=active]:text-primary group-data-[state=active]:font-medium",
+                  "transition-all duration-200"
                 )}>
                   {category.name}
                 </span>
 
-                {/* Active indicator dot */}
+                {/* Subtle active indicator */}
                 <div className={cn(
-                  "absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full",
-                  "opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
+                  "absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full",
+                  "opacity-0 data-[state=active]:opacity-100 transition-opacity duration-200"
                 )} />
               </TabsTrigger>
             ))}
@@ -111,16 +101,16 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
         </Tabs>
       </div>
 
-      {/* Mobile - Enhanced Scrollable Layout */}
+      {/* Mobile - Subtle Scrollable Layout */}
       <div className="sm:hidden relative">
-        {/* Enhanced shadow indicators */}
+        {/* Subtle shadow indicators */}
         <div className={cn(
-          "absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none transition-opacity duration-300 rounded-l-2xl",
+          "absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background via-background/90 to-transparent z-10 pointer-events-none transition-opacity duration-200 rounded-l-xl",
           showLeftShadow ? "opacity-100" : "opacity-0"
         )} />
         
         <div className={cn(
-          "absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none transition-opacity duration-300 rounded-r-2xl",
+          "absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background via-background/90 to-transparent z-10 pointer-events-none transition-opacity duration-200 rounded-r-xl",
           showRightShadow ? "opacity-100" : "opacity-0"
         )} />
 
@@ -138,41 +128,38 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
               WebkitOverflowScrolling: 'touch'
             }}
           >
-            <TabsList className="flex w-max h-auto bg-gradient-to-r from-muted/30 via-muted/20 to-muted/30 backdrop-blur-sm p-3 gap-3 rounded-2xl min-w-full border border-border/50 shadow-lg">
+            <TabsList className="flex w-max h-auto bg-background/50 backdrop-blur-sm p-2 gap-2 rounded-xl min-w-full border border-border/30 shadow-sm">
               {allCategories.map((category, index) => (
                 <TabsTrigger
                   key={category.id}
                   value={category.id}
                   className={cn(
-                    "flex flex-col items-center space-y-2 p-3 min-w-[85px] max-w-[95px]",
-                    // Enhanced mobile active state
-                    "data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/20 data-[state=active]:to-primary/10",
-                    "data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20",
-                    "data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:border-primary/30",
+                    "flex flex-col items-center space-y-1.5 p-2.5 min-w-[70px] max-w-[80px]",
+                    // Subtle mobile active state
+                    "data-[state=active]:bg-primary/8 data-[state=active]:text-primary",
+                    "data-[state=active]:border data-[state=active]:border-primary/20",
                     // Mobile hover effects
-                    "hover:bg-gradient-to-br hover:from-muted/40 hover:to-muted/20 hover:scale-102",
-                    "transition-all duration-300 ease-out",
-                    "rounded-xl flex-shrink-0 group relative overflow-hidden",
+                    "hover:bg-muted/40 hover:text-foreground/80",
+                    "transition-all duration-200 ease-out",
+                    "rounded-lg flex-shrink-0 group relative",
                     // Enhanced margins for shadows
-                    index === 0 && "ml-2",
-                    index === allCategories.length - 1 && "mr-2"
+                    index === 0 && "ml-1",
+                    index === allCategories.length - 1 && "mr-1"
                   )}
                   title={category.description}
                 >
-                  {/* Background gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300 rounded-xl" />
-                  
                   <span className={cn(
-                    "text-xl transition-all duration-300 relative z-10",
-                    "group-hover:scale-110 group-data-[state=active]:scale-110",
-                    "filter group-hover:brightness-110"
+                    "text-base transition-all duration-200 relative z-10",
+                    "group-hover:scale-105 group-data-[state=active]:scale-105",
+                    "opacity-80 group-hover:opacity-100 group-data-[state=active]:opacity-100"
                   )}>
                     {category.icon}
                   </span>
                   <span className={cn(
                     "text-xs font-medium text-center leading-tight px-1 relative z-10",
-                    "group-data-[state=active]:text-foreground group-data-[state=active]:font-semibold",
-                    "truncate w-full transition-all duration-300"
+                    "text-muted-foreground group-hover:text-foreground/80",
+                    "group-data-[state=active]:text-primary group-data-[state=active]:font-medium",
+                    "truncate w-full transition-all duration-200"
                   )}>
                     {category.name}
                   </span>
@@ -182,13 +169,13 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
           </div>
         </Tabs>
 
-        {/* Enhanced scroll hint */}
+        {/* Subtle scroll hint */}
         <div className={cn(
-          "flex items-center justify-center mt-3 text-xs text-muted-foreground/70 transition-opacity duration-500",
+          "flex items-center justify-center mt-2 text-xs text-muted-foreground/50 transition-opacity duration-300",
           !showRightShadow && allCategories.length > 4 ? "opacity-100" : "opacity-0"
         )}>
-          <span className="animate-pulse bg-muted/30 px-3 py-1 rounded-full backdrop-blur-sm">
-            ← Swipe to see more categories
+          <span className="bg-muted/20 px-2 py-1 rounded-md backdrop-blur-sm">
+            ← Swipe for more
           </span>
         </div>
       </div>

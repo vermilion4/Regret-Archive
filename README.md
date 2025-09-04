@@ -96,18 +96,6 @@ A safe, anonymous platform for sharing regrets and life lessons. Connect with ot
    }
    ```
 
-   **Collection: `reactions`**
-
-   ```json
-   {
-     "target_id": "string",
-     "target_type": "string",
-     "reaction_type": "string",
-     "anonymous_id": "string",
-     "created_at": "string"
-   }
-   ```
-
 5. **Run the development server**
 
    ```bash

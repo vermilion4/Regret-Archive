@@ -1,0 +1,27 @@
+{
+  "name": "Regret Archive",
+  "short_name": "RegretArchive",
+  "description": "A safe, anonymous platform for sharing regrets and life lessons",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "lifestyle", "education"],
+  "lang": "en",
+  "dir": "ltr"
+}

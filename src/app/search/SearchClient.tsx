@@ -29,11 +29,6 @@ export default function SearchClient() {
 
       const queries = [];
       
-      // Add search query
-      queries.push(Query.search('title', searchQuery));
-      queries.push(Query.search('story', searchQuery));
-      queries.push(Query.search('lesson', searchQuery));
-      
       // Add category filter
       if (selectedCategory !== 'all') {
         queries.push(Query.equal('category', selectedCategory));
@@ -46,8 +41,8 @@ export default function SearchClient() {
         queries.push(Query.orderDesc('comment_count'));
       }
       
-      // Limit results
-      queries.push(Query.limit(50));
+      // Limit results - we'll fetch more and filter client-side
+      queries.push(Query.limit(200));
 
       const response = await databases.listDocuments(
         DATABASE_ID,
@@ -57,7 +52,21 @@ export default function SearchClient() {
 
       const regretsData = response.documents as unknown as Regret[];
       
-      const processedRegrets = regretsData.map(regret => ({
+      // Client-side search filtering
+      const searchTerm = searchQuery.toLowerCase();
+      const filteredRegrets = regretsData.filter(regret => {
+        const title = (regret.title || '').toLowerCase();
+        const story = (regret.story || '').toLowerCase();
+        const lesson = (regret.lesson || '').toLowerCase();
+        const category = (regret.category || '').toLowerCase();
+        
+        return title.includes(searchTerm) || 
+               story.includes(searchTerm) || 
+               lesson.includes(searchTerm) ||
+               category.includes(searchTerm);
+      });
+      
+      const processedRegrets = filteredRegrets.map(regret => ({
         ...regret,
         reactions: regret.reactions || JSON.stringify({
           hugs: 0,

@@ -91,6 +91,13 @@ export default function SearchClient() {
     }
   };
 
+  const handleUpdate = () => {
+    // Refresh the current search results
+    if (hasSearched) {
+      handleSearch();
+    }
+  };
+
   useEffect(() => {
     if (hasSearched) {
       handleSearch();
@@ -211,12 +218,14 @@ export default function SearchClient() {
         ) : results.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {results.map((regret) => (
-              <RegretCard key={regret.$id} regret={regret} />
+              <RegretCard key={regret.$id} regret={regret} onUpdate={handleUpdate} />
             ))}
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="text-8xl mb-8 opacity-60">🔍</div>
+            <div className="mb-8 opacity-60">
+              <Search className="h-16 w-16 mx-auto text-muted-foreground" />
+            </div>
             <h3 className="text-2xl font-semibold mb-4">No results found</h3>
             <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
               Try different keywords or browse all regrets to discover stories.

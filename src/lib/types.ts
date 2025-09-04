@@ -62,49 +62,49 @@ export const CATEGORIES: CategoryInfo[] = [
     id: 'career',
     name: 'Career',
     description: 'Job choices, missed opportunities, workplace decisions',
-    icon: '💼',
+    icon: 'Briefcase',
     color: 'blue'
   },
   {
     id: 'relationships',
     name: 'Relationships',
     description: 'Love, friendships, family dynamics, social connections',
-    icon: '💕',
+    icon: 'Heart',
     color: 'pink'
   },
   {
     id: 'money',
     name: 'Money',
     description: 'Financial decisions, investments, spending habits',
-    icon: '💰',
+    icon: 'Wallet',
     color: 'green'
   },
   {
     id: 'education',
     name: 'Education',
     description: 'Academic choices, learning opportunities, skill development',
-    icon: '🎓',
+    icon: 'GraduationCap',
     color: 'purple'
   },
   {
     id: 'health',
     name: 'Health',
     description: 'Physical and mental health decisions, lifestyle choices',
-    icon: '🏥',
+    icon: 'Activity',
     color: 'red'
   },
   {
     id: 'family',
     name: 'Family',
     description: 'Parenting, family relationships, generational decisions',
-    icon: '👨‍👩‍👧‍👦',
+    icon: 'Users',
     color: 'orange'
   },
   {
     id: 'other',
     name: 'Other',
     description: 'Miscellaneous regrets and life choices',
-    icon: '🤔',
+    icon: 'HelpCircle',
     color: 'gray'
   }
 ];

@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CATEGORIES, RegretCategory } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
-
+import { getIconComponent } from '@/lib/utils';
 interface CategoryFilterProps {
   selectedCategory: RegretCategory | 'all';
   onCategoryChange: (category: RegretCategory | 'all') => void;
@@ -38,7 +38,7 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
   }, []);
 
   const allCategories = [
-    { id: 'all' as const, name: 'All', icon: '📚', description: 'View all regrets' },
+    { id: 'all' as const, name: 'All', icon: 'BookOpen', description: 'View all regrets' },
     ...CATEGORIES
   ];
 
@@ -61,13 +61,13 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
                 key={category.id}
                 value={category.id}
                 className={cn(
-                  "flex flex-col items-center space-y-2 p-3",
+                  "flex items-center p-3",
                   "data-[state=active]:bg-primary/8 data-[state=active]:text-primary",
                   "data-[state=active]:border data-[state=active]:border-primary/20",
                   "hover:bg-muted/40 hover:text-foreground/80 cursor-pointer",
                   "transition-all duration-200 ease-out",
                   "rounded-lg group relative",
-                  "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-1"
+                  "focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-1 gap-1"
                 )}
                 title={category.description}
               >
@@ -77,7 +77,10 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
                   "group-hover:scale-105 group-data-[state=active]:scale-105",
                   "opacity-80 group-hover:opacity-100 group-data-[state=active]:opacity-100"
                 )}>
-                  {category.icon}
+                  {(() => {
+                    const IconComponent = getIconComponent(category.icon);
+                    return <IconComponent className="h-4 w-4" />;
+                  })()}
                 </span>
                 
                 {/* Label with refined typography */}
@@ -153,7 +156,10 @@ export function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryF
                     "group-hover:scale-105 group-data-[state=active]:scale-105",
                     "opacity-80 group-hover:opacity-100 group-data-[state=active]:opacity-100"
                   )}>
-                    {category.icon}
+                    {(() => {
+                      const IconComponent = getIconComponent(category.icon);
+                      return <IconComponent className="h-4 w-4" />;
+                    })()}
                   </span>
                   <span className={cn(
                     "text-xs font-medium text-center leading-tight px-1 relative z-10",

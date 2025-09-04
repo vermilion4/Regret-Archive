@@ -8,7 +8,7 @@ import { CATEGORIES, RegretCategory, Regret } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
 import Link from 'next/link';
-
+import { getIconComponent } from '@/lib/utils';
 interface CategoryStats {
   id: RegretCategory;
   count: number;
@@ -136,7 +136,12 @@ export default function CategoriesClient() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <span className="text-3xl">{category.icon}</span>
+                        <span className="text-3xl">
+                          {(() => {
+                            const IconComponent = getIconComponent(category.icon);
+                            return <IconComponent className="h-8 w-8" />;
+                          })()}
+                        </span>
                         <div>
                           <h3 className="text-xl font-semibold">{category.name}</h3>
                         </div>

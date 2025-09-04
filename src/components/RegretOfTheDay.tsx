@@ -1,18 +1,51 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Heart, MessageCircle, Lightbulb, Clock, ExternalLink } from 'lucide-react';
+import { Sparkles, Heart, MessageCircle, Lightbulb, Clock, ExternalLink, Users, DoorOpen } from 'lucide-react';
 import { Regret } from '@/lib/types';
-import { safeJsonParse } from '@/lib/utils';
+import { safeJsonParse, getAnonymousId } from '@/lib/utils';
+import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface RegretOfTheDayProps {
   featuredRegret: Regret;
+  onUpdate?: () => void;
 }
 
-export function RegretOfTheDay({ featuredRegret }: RegretOfTheDayProps) {
+export function RegretOfTheDay({ featuredRegret, onUpdate }: RegretOfTheDayProps) {
+  const [reacting, setReacting] = useState<string | null>(null);
   const reactions = safeJsonParse(featuredRegret.reactions, { hugs: 0, me_too: 0, wisdom: 0 });
   const totalReactions = Number(reactions.hugs || 0) + Number(reactions.me_too || 0) + Number(reactions.wisdom || 0);
+
+  const handleReaction = async (reactionType: 'me_too' | 'hugs' | 'wisdom') => {
+    try {
+      setReacting(reactionType);
+      
+      const currentReactions = { ...reactions };
+      currentReactions[reactionType] += 1;
+
+      await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTIONS.REGRETS,
+        featuredRegret.$id,
+        {
+          reactions: JSON.stringify(currentReactions)
+        }
+      );
+
+      if (onUpdate) {
+        onUpdate();
+      }
+      toast.success('Thanks for showing your support!');
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction. Please try again.');
+    } finally {
+      setReacting(null);
+    }
+  };
 
   return (
     <div className="relative mb-16">
@@ -43,8 +76,8 @@ export function RegretOfTheDay({ featuredRegret }: RegretOfTheDayProps) {
           <CardContent className="relative p-8 md:p-12">
             {/* Category and timestamp */}
             <div className="flex items-center justify-between mb-6">
-              <Badge variant="outline" className="bg-primary/10 border-primary/30 text-primary">
-                💼 {featuredRegret.category}
+              <Badge variant="outline" className="bg-primary/10 border-primary/30 text-primary capitalize">
+                {featuredRegret.category}
               </Badge>
               <div className="flex items-center text-sm text-muted-foreground">
                 <Clock className="h-4 w-4 mr-1" />
@@ -79,15 +112,33 @@ export function RegretOfTheDay({ featuredRegret }: RegretOfTheDayProps) {
 
             {/* Reaction buttons */}
             <div className="flex flex-wrap items-center gap-4 mb-6">
-              <Button variant="outline" size="sm" className="bg-red-500/10 border-red-500/30 hover:bg-red-500/20 text-red-500">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleReaction('hugs')}
+                disabled={reacting === 'hugs'}
+                className="bg-red-500/10 border-red-500/30 hover:bg-red-500/20 text-red-500 cursor-pointer"
+              >
                 <Heart className="h-4 w-4 mr-2" />
                 {Number(reactions.hugs || 0)} Hugs
               </Button>
-              <Button variant="outline" size="sm" className="bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-500">
-                <MessageCircle className="h-4 w-4 mr-2" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleReaction('me_too')}
+                disabled={reacting === 'me_too'}
+                className="bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-500 cursor-pointer"
+              >
+                <Users className="h-4 w-4 mr-2" />
                 {Number(reactions.me_too || 0)} Me Too
               </Button>
-              <Button variant="outline" size="sm" className="bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/20 text-yellow-500">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleReaction('wisdom')}
+                disabled={reacting === 'wisdom'}
+                className="bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/20 text-yellow-500 cursor-pointer"
+              >
                 <Lightbulb className="h-4 w-4 mr-2" />
                 {Number(reactions.wisdom || 0)} Wisdom
               </Button>
@@ -110,7 +161,8 @@ export function RegretOfTheDay({ featuredRegret }: RegretOfTheDayProps) {
               {featuredRegret.sliding_doors && (
                 <Button variant="outline" className="flex-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 hover:bg-primary/20 text-primary" asChild>
                   <Link href={`/regret/${featuredRegret.$id}#sliding-doors`}>
-                    🚪 Sliding Doors
+                    <DoorOpen className="h-4 w-4 mr-2" />
+                    Sliding Doors
                   </Link>
                 </Button>
               )}

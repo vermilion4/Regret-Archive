@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { formatDistanceToNow } from 'date-fns';
+import { Activity, BookOpen, Briefcase, GraduationCap, HeartIcon, HelpCircle, UsersIcon, Wallet } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -44,15 +45,15 @@ export function getCategoryColor(category: string): string {
 
 export function getCategoryIcon(category: string): string {
   const icons = {
-    career: '💼',
-    relationships: '💕',
-    money: '💰',
-    education: '🎓',
-    health: '🏥',
-    family: '👨‍👩‍👧‍👦',
-    other: '🤔'
+    career: 'Briefcase',
+    relationships: 'Heart',
+    money: 'Wallet',
+    education: 'GraduationCap',
+    health: 'Activity',
+    family: 'Users',
+    other: 'HelpCircle'
   };
-  return icons[category as keyof typeof icons] || '🤔';
+  return icons[category as keyof typeof icons] || 'HelpCircle';
 }
 
 export function getAnonymousId(): string {
@@ -110,3 +111,17 @@ function ensureNumericValues(obj: any): any {
   }
   return obj;
 }
+
+export const getIconComponent = (iconName: string) => {
+  const iconMap = {
+    BookOpen,
+    Briefcase,
+    Heart: HeartIcon,
+    Wallet,
+    GraduationCap,
+    Activity,
+    Users: UsersIcon,
+    HelpCircle
+  };
+  return iconMap[iconName as keyof typeof iconMap] || HelpCircle;
+};

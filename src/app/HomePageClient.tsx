@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Pagination } from '@/components/ui/pagination';
-import { Heart, MessageCircle, Lightbulb, TrendingUp, Clock, Users, Sparkles, ArrowRight, ArrowUp } from 'lucide-react';
+import { Heart, MessageCircle, Lightbulb, TrendingUp, Clock, Users, Sparkles, ArrowRight, ArrowUp, FileText } from 'lucide-react';
 import { Regret, RegretCategory } from '@/lib/types';
 import { databases, DATABASE_ID, COLLECTIONS } from '@/lib/appwrite';
 import { Query } from 'appwrite';
@@ -467,7 +467,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
           {/* Featured Regret - Redesigned */}
           {featuredRegret && (
-            <RegretOfTheDay featuredRegret={featuredRegret} />
+            <RegretOfTheDay featuredRegret={featuredRegret} onUpdate={fetchRegrets} />
           )}
         </div>
       </div>
@@ -528,7 +528,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 items-stretch">
               {regrets.map((regret) => (
-                <RegretCard key={regret.$id} regret={regret} />
+                <RegretCard key={regret.$id} regret={regret} onUpdate={fetchRegrets} />
               ))}
             </div>
             
@@ -550,7 +550,9 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
         {!loading && regrets.length === 0 && (
           <div className="text-center py-20">
-            <div className="text-8xl mb-8 opacity-60">📝</div>
+            <div className="mb-8 opacity-60">
+              <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+            </div>
             <h3 className="text-2xl font-semibold mb-4">No stories found</h3>
             <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
               {selectedCategory === 'all' 

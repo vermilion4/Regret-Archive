@@ -690,8 +690,8 @@ export function RegretForm({
           ) : (
             <Button
               type="button"
-              variant="submit"
-              size="xl"
+              variant="navigation"
+              size="lg"
               disabled={isSubmitting || !isFormValid()}
               onClick={() => {
                 // Mark that user has attempted validation

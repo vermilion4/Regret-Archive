@@ -23,8 +23,6 @@ const buttonVariants = cva(
         // New variants for form buttons
         primary:
           "bg-primary text-primary-foreground hover:bg-primary/90 transform shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl",
-        submit:
-          "from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transform bg-gradient-to-r shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl disabled:transform-none disabled:shadow-lg",
         navigation:
           "bg-primary text-primary-foreground hover:bg-primary/90 transform shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl",
       },

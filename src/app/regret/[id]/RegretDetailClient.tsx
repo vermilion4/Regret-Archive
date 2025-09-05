@@ -237,7 +237,10 @@ export default function RegretDetailClient({
             )}
 
             {/* Support Reactions */}
-            <SupportReactions regret={regret} onUpdate={fetchRegret} />
+            <SupportReactions 
+              regret={regret} 
+              onUpdate={(updatedRegret) => setRegret(updatedRegret)} 
+            />
 
             {/* Stats */}
             <div className="text-meta flex items-center justify-between">
@@ -260,7 +263,17 @@ export default function RegretDetailClient({
         </Card>
 
         {/* Comments Section */}
-        <CommentSection regretId={regret.$id} onCommentAdded={fetchRegret} />
+        <CommentSection 
+          regretId={regret.$id} 
+          onCommentAdded={(updatedRegret) => {
+            if (updatedRegret) {
+              setRegret(updatedRegret);
+            } else {
+              // Fallback to refetching if no updated data provided
+              fetchRegret();
+            }
+          }} 
+        />
       </div>
 
       {/* Sliding Doors Modal */}

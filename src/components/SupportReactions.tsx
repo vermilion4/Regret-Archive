@@ -4,46 +4,62 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, Users, Lightbulb } from "lucide-react";
 import { Regret } from "@/lib/types";
-import { getAnonymousId, safeJsonParse } from "@/lib/utils";
+import { safeJsonParse } from "@/lib/utils";
 import { databases, DATABASE_ID, COLLECTIONS } from "@/lib/appwrite";
 import toast from "react-hot-toast";
 
 interface SupportReactionsProps {
   regret: Regret;
-  onUpdate: () => void;
+  onUpdate?: (updatedRegret: Regret) => void;
 }
 
 export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
   const [reacting, setReacting] = useState<string | null>(null);
-
-  // Parse the reactions JSON string safely
-  const reactions = safeJsonParse(regret.reactions, {
-    hugs: 0,
-    me_too: 0,
-    wisdom: 0,
-  });
+  const [localReactions, setLocalReactions] = useState(() => 
+    safeJsonParse(regret.reactions, {
+      hugs: 0,
+      me_too: 0,
+      wisdom: 0,
+    })
+  );
 
   const handleReaction = async (reactionType: "me_too" | "hugs" | "wisdom") => {
     try {
       setReacting(reactionType);
 
-      const anonymousId = getAnonymousId();
-      const currentReactions = { ...reactions };
-      currentReactions[reactionType] += 1;
+      // Optimistically update local state
+      const newReactions = { ...localReactions };
+      newReactions[reactionType] += 1;
+      setLocalReactions(newReactions);
 
+      // Update the database
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         regret.$id,
         {
-          reactions: JSON.stringify(currentReactions),
+          reactions: JSON.stringify(newReactions),
         }
       );
 
-      onUpdate();
+      // Update parent component with new regret data
+      if (onUpdate) {
+        const updatedRegret = {
+          ...regret,
+          reactions: JSON.stringify(newReactions),
+        };
+        onUpdate(updatedRegret);
+      }
+
       toast.success("Thanks for showing your support!");
     } catch (error) {
       console.error("Error adding reaction:", error);
+      // Revert optimistic update on error
+      setLocalReactions(safeJsonParse(regret.reactions, {
+        hugs: 0,
+        me_too: 0,
+        wisdom: 0,
+      }));
       toast.error("Failed to add reaction. Please try again.");
     } finally {
       setReacting(null);
@@ -65,7 +81,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Users className="h-5 w-5 text-blue-500" />
           <span>Me Too</span>
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-800">
-            {Number(reactions.me_too || 0)}
+            {Number(localReactions.me_too || 0)}
           </span>
         </Button>
 
@@ -79,7 +95,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Heart className="h-5 w-5 text-red-500" />
           <span>Hugs</span>
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-sm font-medium text-red-800">
-            {Number(reactions.hugs || 0)}
+            {Number(localReactions.hugs || 0)}
           </span>
         </Button>
 
@@ -93,7 +109,7 @@ export function SupportReactions({ regret, onUpdate }: SupportReactionsProps) {
           <Lightbulb className="h-5 w-5 text-yellow-500" />
           <span>Wisdom</span>
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-sm font-medium text-yellow-800">
-            {Number(reactions.wisdom || 0)}
+            {Number(localReactions.wisdom || 0)}
           </span>
         </Button>
       </div>

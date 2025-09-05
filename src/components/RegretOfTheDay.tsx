@@ -20,7 +20,7 @@ import Link from "next/link";
 
 interface RegretOfTheDayProps {
   featuredRegret: Regret;
-  onUpdate?: () => void;
+  onUpdate?: (updatedRegret: Regret) => void;
 }
 
 export function RegretOfTheDay({
@@ -28,38 +28,55 @@ export function RegretOfTheDay({
   onUpdate,
 }: RegretOfTheDayProps) {
   const [reacting, setReacting] = useState<string | null>(null);
-  const reactions = safeJsonParse(featuredRegret.reactions, {
-    hugs: 0,
-    me_too: 0,
-    wisdom: 0,
-  });
+  const [localReactions, setLocalReactions] = useState(() => 
+    safeJsonParse(featuredRegret.reactions, {
+      hugs: 0,
+      me_too: 0,
+      wisdom: 0,
+    })
+  );
   const totalReactions =
-    Number(reactions.hugs || 0) +
-    Number(reactions.me_too || 0) +
-    Number(reactions.wisdom || 0);
+    Number(localReactions.hugs || 0) +
+    Number(localReactions.me_too || 0) +
+    Number(localReactions.wisdom || 0);
 
   const handleReaction = async (reactionType: "me_too" | "hugs" | "wisdom") => {
     try {
       setReacting(reactionType);
 
-      const currentReactions = { ...reactions };
-      currentReactions[reactionType] += 1;
+      // Optimistically update local state
+      const newReactions = { ...localReactions };
+      newReactions[reactionType] += 1;
+      setLocalReactions(newReactions);
 
+      // Update the database
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         featuredRegret.$id,
         {
-          reactions: JSON.stringify(currentReactions),
+          reactions: JSON.stringify(newReactions),
         }
       );
 
+      // Update parent component with new regret data
       if (onUpdate) {
-        onUpdate();
+        const updatedRegret = {
+          ...featuredRegret,
+          reactions: JSON.stringify(newReactions),
+        };
+        onUpdate(updatedRegret);
       }
+
       toast.success("Thanks for showing your support!");
     } catch (error) {
       console.error("Error adding reaction:", error);
+      // Revert optimistic update on error
+      setLocalReactions(safeJsonParse(featuredRegret.reactions, {
+        hugs: 0,
+        me_too: 0,
+        wisdom: 0,
+      }));
       toast.error("Failed to add reaction. Please try again.");
     } finally {
       setReacting(null);
@@ -146,7 +163,7 @@ export function RegretOfTheDay({
                 className="cursor-pointer border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20"
               >
                 <Heart className="mr-2 h-4 w-4" />
-                {Number(reactions.hugs || 0)} Hugs
+                {Number(localReactions.hugs || 0)} Hugs
               </Button>
               <Button
                 variant="outline"
@@ -156,7 +173,7 @@ export function RegretOfTheDay({
                 className="cursor-pointer border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
               >
                 <Users className="mr-2 h-4 w-4" />
-                {Number(reactions.me_too || 0)} Me Too
+                {Number(localReactions.me_too || 0)} Me Too
               </Button>
               <Button
                 variant="outline"
@@ -166,7 +183,7 @@ export function RegretOfTheDay({
                 className="cursor-pointer border-yellow-500/30 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20"
               >
                 <Lightbulb className="mr-2 h-4 w-4" />
-                {Number(reactions.wisdom || 0)} Wisdom
+                {Number(localReactions.wisdom || 0)} Wisdom
               </Button>
             </div>
 

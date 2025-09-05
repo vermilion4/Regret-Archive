@@ -19,7 +19,7 @@ import { useState } from "react";
 interface RegretCardProps {
   regret: Regret;
   variant?: "compact" | "featured" | "detailed";
-  onUpdate?: () => void;
+  onUpdate?: (updatedRegret: Regret) => void;
 }
 
 export function RegretCard({
@@ -28,15 +28,15 @@ export function RegretCard({
   onUpdate,
 }: RegretCardProps) {
   const [reacting, setReacting] = useState<string | null>(null);
+  const [localReactions, setLocalReactions] = useState(() => 
+    safeJsonParse(regret.reactions, {
+      hugs: 0,
+      me_too: 0,
+      wisdom: 0,
+    })
+  );
   const isFeatured = variant === "featured";
   const isDetailed = variant === "detailed";
-
-  // Parse the reactions JSON string safely
-  const reactions = safeJsonParse(regret.reactions, {
-    hugs: 0,
-    me_too: 0,
-    wisdom: 0,
-  });
 
   const handleReaction = async (
     e: React.MouseEvent,
@@ -48,24 +48,39 @@ export function RegretCard({
     try {
       setReacting(reactionType);
 
-      const currentReactions = { ...reactions };
-      currentReactions[reactionType] += 1;
+      // Optimistically update local state
+      const newReactions = { ...localReactions };
+      newReactions[reactionType] += 1;
+      setLocalReactions(newReactions);
 
+      // Update the database
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.REGRETS,
         regret.$id,
         {
-          reactions: JSON.stringify(currentReactions),
+          reactions: JSON.stringify(newReactions),
         }
       );
 
+      // Update parent component with new regret data
       if (onUpdate) {
-        onUpdate();
+        const updatedRegret = {
+          ...regret,
+          reactions: JSON.stringify(newReactions),
+        };
+        onUpdate(updatedRegret);
       }
+
       toast.success("Thanks for showing your support!");
     } catch (error) {
       console.error("Error adding reaction:", error);
+      // Revert optimistic update on error
+      setLocalReactions(safeJsonParse(regret.reactions, {
+        hugs: 0,
+        me_too: 0,
+        wisdom: 0,
+      }));
       toast.error("Failed to add reaction. Please try again.");
     } finally {
       setReacting(null);
@@ -123,7 +138,7 @@ export function RegretCard({
             )}
           </div>
 
-          <div className="mt-auto flex items-center justify-between">
+          <div className="mt-auto flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center space-x-4">
               <button
                 onClick={(e) => handleReaction(e, "hugs")}
@@ -132,7 +147,7 @@ export function RegretCard({
                 title="Send hugs"
               >
                 <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm">{Number(reactions.hugs || 0)}</span>
+                <span className="text-sm">{Number(localReactions.hugs || 0)}</span>
               </button>
               <div className="flex items-center space-x-1">
                 <MessageCircle className="h-4 w-4 text-blue-500" />
@@ -147,7 +162,7 @@ export function RegretCard({
                 title="Me too"
               >
                 <Users className="h-4 w-4 text-blue-500" />
-                <span className="text-sm">{Number(reactions.me_too || 0)}</span>
+                <span className="text-sm">{Number(localReactions.me_too || 0)}</span>
               </button>
               <button
                 onClick={(e) => handleReaction(e, "wisdom")}
@@ -156,7 +171,7 @@ export function RegretCard({
                 title="Share wisdom"
               >
                 <Lightbulb className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm">{Number(reactions.wisdom || 0)}</span>
+                <span className="text-sm">{Number(localReactions.wisdom || 0)}</span>
               </button>
             </div>
 

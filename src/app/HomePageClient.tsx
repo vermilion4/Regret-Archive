@@ -601,7 +601,15 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
           {featuredRegret && (
             <RegretOfTheDay
               featuredRegret={featuredRegret}
-              onUpdate={fetchRegrets}
+              onUpdate={(updatedRegret) => {
+                setFeaturedRegret(updatedRegret);
+                // Also update in the regrets list if it exists there
+                setRegrets(prevRegrets => 
+                  prevRegrets.map(r => 
+                    r.$id === updatedRegret.$id ? updatedRegret : r
+                  )
+                );
+              }}
             />
           )}
         </div>
@@ -672,7 +680,17 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
                 <RegretCard
                   key={regret.$id}
                   regret={regret}
-                  onUpdate={fetchRegrets}
+                  onUpdate={(updatedRegret) => {
+                    setRegrets(prevRegrets => 
+                      prevRegrets.map(r => 
+                        r.$id === updatedRegret.$id ? updatedRegret : r
+                      )
+                    );
+                    // Also update featured regret if it's the same one
+                    if (featuredRegret && featuredRegret.$id === updatedRegret.$id) {
+                      setFeaturedRegret(updatedRegret);
+                    }
+                  }}
                 />
               ))}
             </div>

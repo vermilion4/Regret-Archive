@@ -32,7 +32,7 @@ const commentSchema = z.object({
 
 interface CommentSectionProps {
   regretId: string;
-  onCommentAdded?: () => void;
+  onCommentAdded?: (updatedRegret?: any) => void;
 }
 
 export function CommentSection({
@@ -133,6 +133,15 @@ export function CommentSection({
         [reactionType]: (currentReactions[reactionType] || 0) + 1,
       };
 
+      // Optimistically update local state
+      setComments(prevComments =>
+        prevComments.map(c =>
+          c.$id === commentId
+            ? { ...c, reactions: JSON.stringify(updatedReactions) }
+            : c
+        )
+      );
+
       await databases.updateDocument(
         DATABASE_ID,
         COLLECTIONS.COMMENTS,
@@ -142,10 +151,11 @@ export function CommentSection({
         }
       );
 
-      await fetchComments();
       toast.success("Thanks for your reaction!");
     } catch (error) {
       console.error("Error adding reaction:", error);
+      // Revert optimistic update on error
+      await fetchComments();
       toast.error("Failed to add reaction. Please try again.");
     } finally {
       setReacting(null);
@@ -171,30 +181,58 @@ export function CommentSection({
       };
 
       // Create the comment
-      await databases.createDocument(
+      const newComment = await databases.createDocument(
         DATABASE_ID,
         COLLECTIONS.COMMENTS,
         ID.unique(),
         commentData
       );
 
+      // Optimistically add the new comment to local state
+      const optimisticComment: Comment = {
+        ...newComment,
+        regret_id: regretId,
+        content: data.content,
+        anonymous_id: getAnonymousId(),
+        comment_type: data.comment_type,
+        reactions: JSON.stringify({
+          helpful: 0,
+          heart: 0,
+        }),
+      };
+      
+      setComments(prevComments => [optimisticComment, ...prevComments]);
+
       // Update the regret's comment count
       await updateRegretCommentCount();
 
       form.reset();
-      fetchComments();
 
       // Show success message
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       toast.success("Comment posted successfully!");
 
-      // Notify parent component that a comment was added
+      // Notify parent component that a comment was added with updated regret data
       if (onCommentAdded) {
-        onCommentAdded();
+        // We need to get the updated regret data to pass to the parent
+        try {
+          const updatedRegret = await databases.getDocument(
+            DATABASE_ID,
+            COLLECTIONS.REGRETS,
+            regretId
+          );
+          onCommentAdded(updatedRegret);
+        } catch (error) {
+          console.error("Error fetching updated regret:", error);
+          // Fallback to just calling without data
+          onCommentAdded();
+        }
       }
     } catch (error) {
       console.error("Error submitting comment:", error);
+      // Revert optimistic update on error
+      await fetchComments();
       toast.error("Failed to post comment. Please try again.");
     } finally {
       setSubmitting(false);

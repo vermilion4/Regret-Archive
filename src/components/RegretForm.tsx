@@ -216,7 +216,12 @@ export function RegretForm({
           wisdom: 0,
         }),
         sliding_doors: data.sliding_doors
-          ? JSON.stringify(data.sliding_doors)
+          ? JSON.stringify({
+              ...data.sliding_doors,
+              votes_better: 0,
+              votes_worse: 0,
+              votes_same: 0,
+            })
           : null,
         comment_count: 0,
         is_featured: false,

@@ -98,7 +98,12 @@ export default function RegretDetailClient({
     wisdom: 0,
   });
   const slidingDoors = regret.sliding_doors
-    ? safeJsonParse(regret.sliding_doors, null)
+    ? safeJsonParse(regret.sliding_doors, {
+        alternate_path: "",
+        votes_better: 0,
+        votes_worse: 0,
+        votes_same: 0,
+      })
     : null;
 
   return (
@@ -209,28 +214,34 @@ export default function RegretDetailClient({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 cursor-pointer hover:bg-green-50"
+                        onClick={() => setShowSlidingDoors(true)}
                       >
-                        <ThumbsUp className="h-4 w-4" />
-                        <span>{slidingDoors.votes_better}</span>
+                        <ThumbsUp className="h-4 w-4 text-green-600" />
+                        <span>{slidingDoors.votes_better || 0}</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 cursor-pointer hover:bg-gray-50"
+                        onClick={() => setShowSlidingDoors(true)}
                       >
-                        <Minus className="h-4 w-4" />
-                        <span>{slidingDoors.votes_same}</span>
+                        <Minus className="h-4 w-4 text-gray-600" />
+                        <span>{slidingDoors.votes_same || 0}</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center space-x-1"
+                        className="flex items-center space-x-1 cursor-pointer hover:bg-red-50"
+                        onClick={() => setShowSlidingDoors(true)}
                       >
-                        <ThumbsDown className="h-4 w-4" />
-                        <span>{slidingDoors.votes_worse}</span>
+                        <ThumbsDown className="h-4 w-4 text-red-600" />
+                        <span>{slidingDoors.votes_worse || 0}</span>
                       </Button>
                     </div>
+                  </div>
+                  <div className="text-muted-foreground text-center text-xs">
+                    <p>Click any button above to vote on this alternate timeline</p>
                   </div>
                 </div>
               </div>
@@ -280,8 +291,9 @@ export default function RegretDetailClient({
       {showSlidingDoors && slidingDoors && (
         <SlidingDoorsModal
           slidingDoors={slidingDoors}
+          regretId={regret.$id}
           onClose={() => setShowSlidingDoors(false)}
-          onVote={fetchRegret}
+          onVote={(updatedRegret) => setRegret(updatedRegret)}
         />
       )}
     </div>

@@ -26,8 +26,8 @@ html {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(#e6e6e650 1px, transparent 1px),
-    linear-gradient(90deg, #e6e6e650 1px, transparent 1px);
+    linear-gradient(#e6e6e670 1px, transparent 1px),
+    linear-gradient(90deg, #e6e6e670 1px, transparent 1px);
   background-size: 3.7em 3.7em;
   mask-image: radial-gradient(ellipse at 50% 40%, black 0%, transparent 55%);
   z-index: -1;

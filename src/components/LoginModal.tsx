@@ -123,7 +123,7 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
       </DialogTrigger>
       <DialogContent className="bg-card border-primary/20 shadow-primary/10 border-2 shadow-2xl backdrop-blur-md sm:max-w-md">
         <DialogHeader className="space-y-4">
-          <DialogTitle className="from-primary to-primary/70 bg-gradient-to-r bg-clip-text text-center text-2xl font-bold text-transparent">
+          <DialogTitle className="from-primary to-primary/70 bg-gradient-to-r bg-clip-text text-center text-2xl font-bold text-primary">
             Welcome to Regret Archive
           </DialogTitle>
           <div className="via-primary/30 h-px w-full bg-gradient-to-r from-transparent to-transparent"></div>
@@ -133,19 +133,19 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
           <TabsList className="bg-muted/50 border-border/50 grid w-full grid-cols-3 rounded-lg border p-1">
             <TabsTrigger
               value="login"
-              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-[102%] data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Login
             </TabsTrigger>
             <TabsTrigger
               value="signup"
-              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-[102%] data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Sign Up
             </TabsTrigger>
             <TabsTrigger
               value="anonymous"
-              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-[102%] data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Anonymous
             </TabsTrigger>

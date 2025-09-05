@@ -52,8 +52,6 @@ const TabsTrigger = React.forwardRef<
       "active:scale-[0.98] active:transition-transform active:duration-75",
       // Icon support
       "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      // Dark mode improvements
-      "dark:hover:bg-muted/40 dark:data-[state=active]:bg-background/95",
       "dark:data-[state=active]:border-border/30",
       className
     )}

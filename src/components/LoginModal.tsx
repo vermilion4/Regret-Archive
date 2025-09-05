@@ -133,19 +133,19 @@ export function LoginModal({ autoOpen = false, trigger }: LoginModalProps) {
           <TabsList className="bg-muted/50 border-border/50 grid w-full grid-cols-3 rounded-lg border p-1">
             <TabsTrigger
               value="login"
-              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Login
             </TabsTrigger>
             <TabsTrigger
               value="signup"
-              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Sign Up
             </TabsTrigger>
             <TabsTrigger
               value="anonymous"
-              className="data-[state=active]:bg-primary data-[state=active]:border-primary/30 hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="hover:bg-muted/80 transition-all duration-300 data-[state=active]:scale-105 data-[state=active]:border-2 data-[state=active]:font-semibold data-[state=active]:shadow-lg"
             >
               Anonymous
             </TabsTrigger>

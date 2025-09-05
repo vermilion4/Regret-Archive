@@ -209,7 +209,7 @@ export default function CategoriesClient() {
 
         {/* Call to Action */}
         <div className="mt-16 text-center">
-          <Card className="from-primary/10 to-secondary/10 border-primary/20 mx-auto max-w-2xl bg-gradient-to-r">
+          <Card className="bg-muted/30 relative z-10">
             <CardContent className="p-8">
               <h2 className="font-bungee mb-4 text-2xl font-bold">
                 Ready to Share Your Story?
